@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RegEngine — Entity Profile & ACRA UBO Visualizer</title>
+  <style>
+    /* ==========================================================================
+       1. CORE SYSTEM STYLES & THEME VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-main: #0a0f1d;
+      --bg-card: #12192c;
+      --bg-card-hover: #1a243f;
+      --border-color: #233152;
+      --border-focus: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-teal: #0d9488;
+      --status-success: #10b981;
+      --status-warning: #f59e0b;
+      --status-danger: #ef4444;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. TOP NAVIGATION HEADER & SUB-BAR
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .shield-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0d9488, #2563eb);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-portal {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      background-color: rgba(13, 148, 136, 0.15);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      color: #2dd4bf;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    /* INVESTIGATION STEPS NAV BAR */
+    .investigation-nav {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .case-title-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .case-title-tag strong {
+      color: var(--text-main);
+    }
+
+    .case-uen {
+      font-family: monospace;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      color: #93c5fd;
+    }
+
+    .step-pills {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .step-pill {
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-muted);
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .step-pill.active {
+      background-color: var(--accent-blue);
+      color: white;
+      border-color: var(--accent-blue);
+    }
+
+    /* ==========================================================================
+       3. MAIN LAYOUT
+       ========================================================================== */
+    .main-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex-grow: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* SIDEBAR: ACRA PROFILE */
+    .acra-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      height: fit-content;
+    }
+
+    .acra-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .acra-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .acra-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--status-success);
+      font-weight: 600;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-item label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .info-item span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* MAIN AREA: UBO VISUALIZER */
+    .workspace-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .workspace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    .workspace-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .mas-threshold-badge {
+      font-size: 0.75rem;
+      background-color: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* TREE GRAPH VISUALIZER */
+    .tree-container {
+      background-color: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .tree-node {
+      background-color: var(--bg-card-hover);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 220px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .tree-node.root {
+      border-color: var(--accent-blue);
+      background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .tree-node.ubo-flagged {
+      border-color: var(--status-danger);
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .node-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .node-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .equity-tag {
+      position: absolute;
+      top: -12px;
+      right: 10px;
+      background-color: var(--status-danger);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+    }
+
+    .equity-tag.safe {
+      background-color: var(--accent-teal);
+    }
+
+    .tree-branches {
+      display: flex;
+      gap: 2rem;
+      position: relative;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* CONNECTOR LINES */
+    .connector-line {
+      width: 2px;
+      height: 24px;
+      background-color: var(--border-color);
+      margin: 0 auto;
+    }
+
+    /* ACTION NAVIGATION FOOTER */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 1rem;
+    }
+
+    .btn-next {
+      background-color: var(--accent-teal);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s ease;
+    }
+
+    .btn-next:hover {
+      background-color: #0f766e;
+    }
+
+    .btn-back {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.8rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="shield-icon">🛡️</div>
+      <span class="brand-title">RegEngine</span>
+      <span class="badge-portal">Back-Office Workstation</span>
+    </div>
+
+    <div class="user-profile-bar">
+      <button class="btn-back" onclick="window.location.href='index.html'">Main Gateway 🏠</button>
+    </div>
+  </header>
+
+  <!-- SUB NAV BAR -->
+  <div class="investigation-nav">
+    <div class="case-title-tag">
+      <span>Active Investigation:</span>
+      <strong id="header-company">TechCorp Solutions Pte. Ltd.</strong>
+      <span class="case-uen" id="header-uen">202412345K</span>
+    </div>
+
+    <div class="step-pills">
+      <a href="analyst-queue.html" class="step-pill">1. Queue</a>
+      <a href="analyst-ubo.html" class="step-pill active">2. ACRA & UBO Tree</a>
+      <a href="analyst-sanctions.html" class="step-pill">3. PEP Screening</a>
+      <a href="analyst-decision.html" class="step-pill">4. Decision & Audit</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="main-container">
+    
+    <!-- LEFT SIDEBAR: ACRA OFFICIAL PROFILE -->
+    <aside class="acra-card">
+      <div class="acra-header">
+        <h3>ACRA Registry Profile</h3>
+        <span class="acra-status">● Live API Synced</span>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <label>Entity UEN</label>
+          <span id="acra-uen">202412345K</span>
+        </div>
+
+        <div class="info-item">
+          <label>Incorporation Date</label>
+          <span>14 March 2024</span>
+        </div>
+
+        <div class="info-item">
+          <label>Entity Legal Type</label>
+          <span>Exempt Private Limited Company</span>
+        </div>
+
+        <div class="info-item">
+          <label>SSIC Code & Sector</label>
+          <span id="acra-ssic">62011 - Software & Fintech</span>
+        </div>
+
+        <div class="info-item">
+          <label>Paid-Up Capital</label>
+          <span id="acra-capital">SGD $500,000</span>
+        </div>
+
+        <div class="info-item">
+          <label>Registered Office Address</label>
+          <span id="acra-address">12 Marina Boulevard, #18-01 MBFC, Singapore 018982</span>
+        </div>
+
+        <div class="info-item">
+          <label>Singpass Liveness Score</label>
+          <span style="color: var(--status-success);">99.4% Biometric Confidence</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL: SHAREHOLDER & UBO VISUALIZER -->
+    <section class="workspace-card">
+      <div class="workspace-header">
+        <h3>Automated UBO Shareholder Tree</h3>
+        <span class="mas-threshold-badge">MAS Notice 626 UBO Threshold: ≥ 25% Equity</span>
+      </div>
+
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        The visualizer extracts shareholder registers from ACRA filings to identify natural person UBOs holding controlling equity.
+      </p>
+
+      <!-- VISUAL TREE -->
+      <div class="tree-container">
+        
+        <!-- TARGET COMPANY NODE -->
+        <div class="tree-node root">
+          <div class="node-title" id="tree-company">TechCorp Solutions Pte. Ltd.</div>
+          <div class="node-subtitle">Applicant Target Entity</div>
+        </div>
+
+        <div class="connector-line"></div>
+
+        <!-- SHAREHOLDER BRANCHES -->
+        <div class="tree-branches">
+          
+          <!-- SHAREHOLDER 1: UBO FLAGGED -->
+          <div class="tree-node ubo-flagged">
+            <span class="equity-tag">65% EQUITY (UBO)</span>
+            <div class="node-title" id="tree-director">Tan Wei Ming</div>
+            <div class="node-subtitle">Individual Director & Shareholder</div>
+            <div style="font-size: 0.75rem; color: var(--status-danger); margin-top: 0.4rem; font-weight: 600;">
+              🚨 Triggers MAS UBO Requirement
+            </div>
+          </div>
+
+          <!-- SHAREHOLDER 2: MINORITY SHAREHOLDER -->
+          <div class="tree-node">
+            <span class="equity-tag safe">35% EQUITY</span>
+            <div class="node-title">Venture Tech Capital Ltd.</div>
+            <div class="node-subtitle">Corporate Investment Entity</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
+              Institutional Minority
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BOTTOM ACTION BAR -->
+      <div class="action-bar">
+        <button class="btn-back" onclick="window.location.href='analyst-queue.html'">
+          ← Back to Queue
+        </button>
+        <button class="btn-next" onclick="window.location.href='analyst-sanctions.html'">
+          Proceed to PEP & Sanctions Screening (Page 5) ➔
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    RegEngine FinTech Workstation &copy; 2026 — Designed for MAS Notice 626 Regulatory Standards.
+  </footer>
+
+  <script>
+    // Load active case details from SessionStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const rawData = sessionStorage.getItem('regengine_latest_app');
+      if (rawData) {
+        const app = JSON.parse(rawData);
+        document.getElementById('header-company').textContent = app.companyName || 'TechCorp Solutions Pte. Ltd.';
+        document.getElementById('header-uen').textContent = app.uen || '202412345K';
+        
+        document.getElementById('acra-uen').textContent = app.uen || '202412345K';
+        document.getElementById('acra-ssic').textContent = app.ssic || '62011 - Software & Fintech';
+        document.getElementById('acra-capital').textContent = 'SGD $' + (parseInt(app.capital || 500000).toLocaleString());
+        document.getElementById('acra-address').textContent = app.address || '12 Marina Boulevard, #18-01 MBFC, Singapore 018982';
+
+        document.getElementById('tree-company').textContent = app.companyName || 'TechCorp Solutions Pte. Ltd.';
+        document.getElementById('tree-director').textContent = (app.directorName || 'Tan Wei Ming');
+      }
+    });
+  </script>
+</body>
+</html>

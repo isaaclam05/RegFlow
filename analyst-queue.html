@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RegEngine — Compliance Case Queue & Triage Dashboard</title>
+  <style>
+    /* ==========================================================================
+       1. CORE SYSTEM STYLES & THEME VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-main: #0a0f1d;
+      --bg-card: #12192c;
+      --bg-card-hover: #1a243f;
+      --border-color: #233152;
+      --border-focus: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-teal: #0d9488;
+      --status-success: #10b981;
+      --status-warning: #f59e0b;
+      --status-danger: #ef4444;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. TOP WORKSTATION HEADER
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .shield-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0d9488, #2563eb);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-portal {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      background-color: rgba(13, 148, 136, 0.15);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      color: #2dd4bf;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .user-profile-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .user-name {
+      color: var(--text-muted);
+    }
+
+    .user-name strong {
+      color: var(--text-main);
+    }
+
+    .btn-switch {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-switch:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-focus);
+    }
+
+    /* ==========================================================================
+       3. MAIN CONTAINER & METRICS
+       ========================================================================== */
+    .main-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .dashboard-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-title-bar h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .dashboard-title-bar p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* METRICS GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .metric-info label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-info .value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .metric-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .metric-badge.blue {
+      background-color: rgba(37, 99, 235, 0.15);
+      color: #60a5fa;
+    }
+
+    .metric-badge.red {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .metric-badge.teal {
+      background-color: rgba(13, 148, 136, 0.15);
+      color: #2dd4bf;
+    }
+
+    /* ==========================================================================
+       4. TRIAGE DATA TABLE
+       ========================================================================== */
+    .table-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .table-toolbar {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box input {
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      color: var(--text-main);
+      font-size: 0.875rem;
+      outline: none;
+      width: 260px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      background-color: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background-color: var(--accent-teal);
+      color: white;
+      border-color: var(--accent-teal);
+    }
+
+    /* TABLE LAYOUT */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th {
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    tr:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    /* BADGES */
+    .risk-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .risk-badge.high {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .risk-badge.medium {
+      background-color: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    .risk-badge.low {
+      background-color: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .trigger-tag {
+      font-family: monospace;
+      font-size: 0.8rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-review {
+      background-color: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-review:hover {
+      background-color: #1d4ed8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="shield-icon">🛡️</div>
+      <span class="brand-title">RegEngine</span>
+      <span class="badge-portal">Back-Office Workstation</span>
+    </div>
+
+    <div class="user-profile-bar">
+      <span class="user-name">Role: <strong>J. Tan (AML Senior Officer)</strong></span>
+      <button class="btn-switch" onclick="window.location.href='index.html'">Switch Persona 🔄</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="main-container">
+    
+    <div class="dashboard-title-bar">
+      <div>
+        <h2>AML Case Triage & Daily Queue</h2>
+        <p>Monitor pending corporate onboarding applications, high-risk triggers, and SLA targets.</p>
+      </div>
+    </div>
+
+    <!-- METRICS OVERVIEW -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-info">
+          <label>Pending Review Queue</label>
+          <div class="value" id="metric-pending">3 Cases</div>
+        </div>
+        <div class="metric-badge blue">📋</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-info">
+          <label>High-Risk Priority</label>
+          <div class="value">1 Flagged</div>
+        </div>
+        <div class="metric-badge red">🚨</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-info">
+          <label>MAS SLA Target</label>
+          <div class="value">&lt; 4.0 Hrs</div>
+        </div>
+        <div class="metric-badge teal">⏱️</div>
+      </div>
+    </div>
+
+    <!-- QUEUE TABLE CARD -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <input type="text" placeholder="Search by UEN, Company, or Director...">
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active">All Cases</button>
+          <button class="filter-btn">High Risk</button>
+          <button class="filter-btn">PEP Matches</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Entity Legal Name</th>
+              <th>UEN</th>
+              <th>Risk Score</th>
+              <th>RegTech Triggers</th>
+              <th>Submitted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="queue-tbody">
+            <!-- Row 1: Active Form Submission (Populated dynamically via JS or Fallback) -->
+            <tr id="row-latest">
+              <td>
+                <strong id="tb-company">TechCorp Solutions Pte. Ltd.</strong><br>
+                <small style="color: var(--text-muted);" id="tb-ssic">62011 - Software & Fintech</small>
+              </td>
+              <td id="tb-uen">202412345K</td>
+              <td>
+                <span class="risk-badge high">88 / 100 HIGH</span>
+              </td>
+              <td>
+                <span class="trigger-tag">PEP Match (88%)</span>
+                <span class="trigger-tag">Complex UBO (≥25%)</span>
+              </td>
+              <td>12 mins ago</td>
+              <td>
+                <button class="btn-review" onclick="openCase('202412345K')">
+                  Review Case ➔
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2: Mock Case B -->
+            <tr>
+              <td>
+                <strong>Global Trading Partners Pte. Ltd.</strong><br>
+                <small style="color: var(--text-muted);">46900 - Wholesale Trade</small>
+              </td>
+              <td>202309871M</td>
+              <td>
+                <span class="risk-badge medium">42 / 100 MED</span>
+              </td>
+              <td>
+                <span class="trigger-tag">Cross-Border Shareholder</span>
+              </td>
+              <td>1.5 hrs ago</td>
+              <td>
+                <button class="btn-review" onclick="openCase('202309871M')">
+                  Review Case ➔
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 3: Mock Case C -->
+            <tr>
+              <td>
+                <strong>Apex Innovations Asia Pte. Ltd.</strong><br>
+                <small style="color: var(--text-muted);">62021 - IT Consultancy</small>
+              </td>
+              <td>202211223E</td>
+              <td>
+                <span class="risk-badge low">12 / 100 LOW</span>
+              </td>
+              <td>
+                <span class="trigger-tag">Clean Screening</span>
+              </td>
+              <td>3.2 hrs ago</td>
+              <td>
+                <button class="btn-review" onclick="openCase('202211223E')">
+                  Review Case ➔
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    RegEngine FinTech Workstation &copy; 2026 — Designed for MAS Notice 626 Regulatory Standards.
+  </footer>
+
+  <script>
+    // Load submitted data from SessionStorage if present
+    window.addEventListener('DOMContentLoaded', () => {
+      const rawData = sessionStorage.getItem('regengine_latest_app');
+      if (rawData) {
+        const app = JSON.parse(rawData);
+        document.getElementById('tb-company').textContent = app.companyName || 'TechCorp Solutions Pte. Ltd.';
+        document.getElementById('tb-ssic').textContent = app.ssic || '62011 - Software & Fintech';
+        document.getElementById('tb-uen').textContent = app.uen || '202412345K';
+      }
+    });
+
+    function openCase(uen) {
+      // Store selected case UEN for investigation views
+      sessionStorage.setItem('regengine_active_case_uen', uen);
+      // Navigate to Page 4: ACRA & UBO Visualizer
+      window.location.href = 'analyst-ubo.html';
+    }
+  </script>
+</body>
+</html>

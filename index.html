@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RegFlow — Institutional KYB & AML Access Portal</title>
+  <style>
+    /* ==========================================================================
+       1. SYSTEM COLOR VARIABLES & DARK ENTERPRISE THEME
+       ========================================================================== */
+    :root {
+      --bg-main: #060913;
+      --bg-card: rgba(13, 20, 36, 0.7);
+      --bg-card-inner: rgba(21, 32, 54, 0.45);
+      --bg-card-hover: rgba(26, 40, 68, 0.65);
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --border-blue: rgba(56, 189, 248, 0.4);
+      --border-teal: rgba(45, 212, 191, 0.4);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      
+      --accent-blue: #0284c7;
+      --accent-blue-light: #38bdf8;
+      --accent-blue-glow: rgba(2, 132, 199, 0.25);
+      
+      --accent-teal: #0d9488;
+      --accent-teal-light: #2dd4bf;
+      --accent-teal-glow: rgba(13, 148, 136, 0.25);
+      
+      --status-success: #10b981;
+      --status-success-glow: rgba(16, 185, 129, 0.4);
+      --font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3.5rem 1.5rem 2rem 1.5rem;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Lighting Effects */
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 500px;
+      height: 500px;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+
+    body::after {
+      width: 400px;
+      height: 400px;
+      bottom: 5%;
+      right: 10%;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+
+    /* ==========================================================================
+       2. ANIMATIONS
+       ========================================================================== */
+    @keyframes subtleFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseRing {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .fade-in {
+      animation: subtleFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ==========================================================================
+       3. BRAND HEADER
+       ========================================================================== */
+    .brand-header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      margin-bottom: 2.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-logo-img {
+      height: 76px;
+      width: auto;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 20px rgba(56, 189, 248, 0.25));
+      transition: transform 0.3s ease;
+    }
+
+    .brand-logo-img:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+      line-height: 1.5;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .compliance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      padding: 0.35rem 0.95rem;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 20px;
+      color: #34d399;
+      font-size: 0.725rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.08);
+    }
+
+    .compliance-badge .badge-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--status-success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--status-success);
+    }
+
+    /* ==========================================================================
+       4. GATEWAY CONTAINER & ROLE CARDS
+       ========================================================================== */
+    .gateway-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 860px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .gateway-header {
+      padding: 2.25rem 2.5rem 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .gateway-title {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .gateway-description {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 2.25rem 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .roles-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+      }
+      .gateway-header {
+        padding: 1.5rem;
+      }
+    }
+
+    .role-card {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.75rem 1.5rem 1.5rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background-color 0.25s ease;
+    }
+
+    .role-card.sme:hover::before { background: var(--accent-blue-light); }
+    .role-card.analyst:hover::before { background: var(--accent-teal-light); }
+
+    .role-card:hover {
+      background-color: var(--bg-card-hover);
+      transform: translateY(-3px);
+    }
+
+    .role-card.sme:hover {
+      border-color: var(--border-blue);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--accent-blue-glow);
+    }
+
+    .role-card.analyst:hover {
+      border-color: var(--border-teal);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--accent-teal-glow);
+    }
+
+    .role-card:focus-visible {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+    }
+
+    .role-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: border-color 0.25s ease;
+    }
+
+    .role-card.sme:hover .role-icon-box { border-color: rgba(56, 189, 248, 0.4); }
+    .role-card.analyst:hover .role-icon-box { border-color: rgba(45, 212, 191, 0.4); }
+
+    .role-icon-svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .role-card.sme .role-icon-svg { stroke: var(--accent-blue-light); }
+    .role-card.analyst .role-icon-svg { stroke: var(--accent-teal-light); }
+
+    .role-title-group h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .role-title-group span {
+      font-size: 0.7rem;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .role-features {
+      list-style: none;
+      margin-bottom: 1.75rem;
+    }
+
+    .role-features li {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      line-height: 1.4;
+    }
+
+    .feature-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      font-weight: bold;
+    }
+
+    .role-card.sme .feature-check {
+      background: rgba(2, 132, 199, 0.2);
+      color: var(--accent-blue-light);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .role-card.analyst .feature-check {
+      background: rgba(13, 148, 136, 0.2);
+      color: var(--accent-teal-light);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+
+    .btn-action {
+      position: relative;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+    }
+
+    .btn-action::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: skewX(-20deg);
+    }
+
+    .role-card:hover .btn-action::after {
+      animation: shine 1.2s ease;
+    }
+
+    .role-card.sme .btn-action {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #0369a1 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .role-card.sme .btn-action:hover {
+      background: linear-gradient(135deg, #0284c7 0%, #075985 100%);
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+    }
+
+    .role-card.analyst .btn-action {
+      background: linear-gradient(135deg, var(--accent-teal) 0%, #0f766e 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    }
+
+    .role-card.analyst .btn-action:hover {
+      background: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
+      box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45);
+    }
+
+    /* ==========================================================================
+       5. SYSTEM STATUS FOOTER BAR
+       ========================================================================== */
+    .system-status-panel {
+      background: rgba(8, 12, 22, 0.85);
+      border-top: 1px solid var(--border-subtle);
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .status-title {
+      font-size: 0.725rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      font-weight: 700;
+    }
+
+    .status-items {
+      display: flex;
+      gap: 1.75rem;
+      align-items: center;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status-dot-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--status-success);
+    }
+
+    .status-ring {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--status-success);
+      animation: pulseRing 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    /* ==========================================================================
+       6. PAGE FOOTER
+       ========================================================================== */
+    footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body class="fade-in">
+
+  <!-- BRAND HEADER -->
+  <header class="brand-header">
+    <img src="logo-only.png" alt="RegFlow - Automated KYB & AML Compliance Platform" class="brand-logo-img">
+    <p class="brand-subtitle">Automated Corporate KYB Onboarding & Real-Time AML Compliance Engine</p>
+    <div class="compliance-badge">
+      <span class="badge-dot"></span> MAS Notice 626 Compliant Framework
+    </div>
+  </header>
+
+  <!-- GATEWAY CONTAINER -->
+  <main class="gateway-container">
+    <div class="gateway-header">
+      <h2 class="gateway-title">Access Portal Workspace</h2>
+      <p class="gateway-description">Select your functional persona to enter the operational environment:</p>
+    </div>
+
+    <div class="roles-grid">
+      
+      <!-- ROLE 1: SME APPLICANT -->
+      <div class="role-card sme" tabindex="0" onclick="selectRole('SME_USER', 'sme-onboarding.html')">
+        <div>
+          <div class="role-header">
+            <div class="role-icon-box">
+              <svg class="role-icon-svg" viewBox="0 0 24 24">
+                <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path>
+                <path d="M1 21h22"></path>
+                <path d="M9 7h1"></path>
+                <path d="M9 11h1"></path>
+                <path d="M9 15h1"></path>
+                <path d="M14 7h1"></path>
+                <path d="M14 11h1"></path>
+                <path d="M14 15h1"></path>
+              </svg>
+            </div>
+            <div class="role-title-group">
+              <span>Front-Office</span>
+              <h3>SME Applicant Portal</h3>
+            </div>
+          </div>
+          <ul class="role-features">
+            <li><span class="feature-check">✓</span> Submit UEN & Entity Profile</li>
+            <li><span class="feature-check">✓</span> Singpass Myinfo Corporate Integration</li>
+            <li><span class="feature-check">✓</span> Upload Supporting Board Resolutions</li>
+            <li><span class="feature-check">✓</span> Track Onboarding Application Status</li>
+          </ul>
+        </div>
+        <button class="btn-action">
+          Enter Customer Portal ➔
+        </button>
+      </div>
+
+      <!-- ROLE 2: COMPLIANCE OFFICER -->
+      <div class="role-card analyst" tabindex="0" onclick="selectRole('ANALYST_USER', 'analyst-queue.html')">
+        <div>
+          <div class="role-header">
+            <div class="role-icon-box">
+              <svg class="role-icon-svg" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="m9 12 2 2 4-4"></path>
+              </svg>
+            </div>
+            <div class="role-title-group">
+              <span>Back-Office</span>
+              <h3>AML Compliance Workstation</h3>
+            </div>
+          </div>
+          <ul class="role-features">
+            <li><span class="feature-check">✓</span> Manage Case Triage & SLA Queue</li>
+            <li><span class="feature-check">✓</span> ACRA Ownership & UBO Mapping</li>
+            <li><span class="feature-check">✓</span> Fuzzy PEP & Sanctions Screening</li>
+            <li><span class="feature-check">✓</span> Audit Logging & Determination Sign-off</li>
+          </ul>
+        </div>
+        <button class="btn-action">
+          Enter Compliance Workstation ➔
+        </button>
+      </div>
+
+    </div>
+
+    <!-- LIVE REGTECH API STATUS PANEL -->
+    <div class="system-status-panel">
+      <span class="status-title">System Infrastructure Status</span>
+      <div class="status-items">
+        <div class="status-item">
+          <div class="status-dot-container">
+            <span class="status-ring"></span>
+            <span class="status-dot"></span>
+          </div>
+          ACRA API
+        </div>
+        <div class="status-item">
+          <div class="status-dot-container">
+            <span class="status-ring"></span>
+            <span class="status-dot"></span>
+          </div>
+          Myinfo Singpass
+        </div>
+        <div class="status-item">
+          <div class="status-dot-container">
+            <span class="status-ring"></span>
+            <span class="status-dot"></span>
+          </div>
+          Sanctions Feed
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    RegFlow Workstation &copy; 2026 — Built for Regulatory Compliance.
+  </footer>
+
+  <!-- SESSION MANAGEMENT SCRIPT -->
+  <script>
+    function selectRole(role, targetPage) {
+      sessionStorage.setItem('regflow_user_role', role);
+      sessionStorage.setItem('regflow_login_time', new Date().toISOString());
+
+      if (role === 'SME_USER') {
+        sessionStorage.setItem('regflow_user_name', 'TechCorp Pte. Ltd. (Applicant)');
+      } else {
+        sessionStorage.setItem('regflow_user_name', 'J. Tan (Senior AML Officer)');
+      }
+
+      window.location.href = targetPage;
+    }
+
+    // Keyboard Access Support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && document.activeElement.classList.contains('role-card')) {
+        document.activeElement.click();
+      }
+    });
+  </script>
+</body>
+</html>

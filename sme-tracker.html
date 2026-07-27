@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RegEngine — Live Application Tracker</title>
+  <style>
+    /* ==========================================================================
+       1. CORE SYSTEM STYLES & THEME VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-main: #0a0f1d;
+      --bg-card: #12192c;
+      --bg-card-hover: #1a243f;
+      --border-color: #233152;
+      --border-focus: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-teal: #0d9488;
+      --status-success: #10b981;
+      --status-warning: #f59e0b;
+      --status-danger: #ef4444;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. TOP NAVIGATION HEADER
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .shield-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #2563eb, #0d9488);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-portal {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      background-color: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      color: #93c5fd;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .btn-switch {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-switch:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-focus);
+    }
+
+    /* ==========================================================================
+       3. MAIN TRACKER CONTAINER & KEYFRAME ANIMATIONS
+       ========================================================================== */
+    .main-container {
+      max-width: 900px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .tracker-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+      70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+
+    .animate-item {
+      opacity: 0;
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Staggered Delay Classes */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.25s; }
+    .delay-3 { animation-delay: 0.4s; }
+    .delay-4 { animation-delay: 0.55s; }
+    .delay-5 { animation-delay: 0.7s; }
+    .delay-6 { animation-delay: 0.85s; }
+    .delay-7 { animation-delay: 1.0s; }
+
+    /* STATUS BANNER */
+    .status-banner {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(245, 158, 11, 0.1));
+      border: 1px solid var(--status-warning);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+    }
+
+    .banner-text h3 {
+      font-size: 1.1rem;
+      color: var(--status-warning);
+      margin-bottom: 0.25rem;
+    }
+
+    .banner-text p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .case-id-tag {
+      background-color: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: var(--text-main);
+    }
+
+    /* STEPPER WORKFLOW */
+    .stepper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+
+    .stepper::before {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: 19px;
+      width: 2px;
+      height: calc(100% - 30px);
+      background-color: var(--border-color);
+      z-index: 1;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .step-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-icon {
+      background-color: var(--status-success);
+      border-color: var(--status-success);
+      color: white;
+    }
+
+    .step-item.active .step-icon {
+      background-color: var(--accent-blue);
+      border-color: var(--border-focus);
+      color: white;
+      animation: pulseGlow 2s infinite;
+    }
+
+    .step-content {
+      padding-top: 0.2rem;
+    }
+
+    .step-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .step-description {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .step-timestamp {
+      font-size: 0.75rem;
+      color: var(--status-warning);
+      margin-top: 0.25rem;
+      font-weight: 600;
+    }
+
+    /* PREVIEW CONTAINER & DATA CARDS */
+    .preview-container {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .preview-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .preview-section {
+      background-color: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .preview-section:hover {
+      border-color: var(--border-focus);
+    }
+
+    .preview-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-item label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-item span {
+      font-size: 0.925rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .ubo-chip {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .badge-pep {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+
+    .badge-pep-no {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-pep-yes {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .demo-shortcut-panel {
+      border-top: 1px dashed var(--border-color);
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+
+    .demo-shortcut-panel p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .btn-analyst-jump {
+      background-color: var(--accent-teal);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.925rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-analyst-jump:hover {
+      background-color: #0f766e;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="shield-icon">🛡️</div>
+      <span class="brand-title">RegEngine</span>
+      <span class="badge-portal">SME Customer Portal</span>
+    </div>
+    <div>
+      <button class="btn-switch" onclick="window.location.reload()">Refresh Data 🔄</button>
+    </div>
+  </header>
+
+  <!-- MAIN TRACKER CONTAINER -->
+  <main class="main-container">
+    <div class="tracker-card">
+      
+      <!-- STATUS BANNER -->
+      <div class="status-banner animate-item delay-1">
+        <div class="banner-text">
+          <h3>Application Status: Under Review</h3>
+          <p>Your details have passed ACRA & Singpass automated checks. Sent to AML Officer for final review.</p>
+        </div>
+        <div class="case-id-tag" id="display-uen">UEN: Loading...</div>
+      </div>
+
+      <!-- PROGRESS STEPPER -->
+      <div class="stepper">
+        <div class="step-item completed animate-item delay-1">
+          <div class="step-icon">✓</div>
+          <div class="step-content">
+            <div class="step-title">1. Corporate Application Submitted</div>
+            <div class="step-description">UEN registration and supporting files uploaded successfully.</div>
+          </div>
+        </div>
+
+        <div class="step-item completed animate-item delay-2">
+          <div class="step-icon">✓</div>
+          <div class="step-content">
+            <div class="step-title">2. Automated Registry & Identity Extraction</div>
+            <div class="step-description">ACRA BizFile data pulled and director credentials verified via Singpass.</div>
+          </div>
+        </div>
+
+        <div class="step-item active animate-item delay-3">
+          <div class="step-icon">⚡</div>
+          <div class="step-content">
+            <div class="step-title">3. Compliance Officer Enhanced Due Diligence (EDD)</div>
+            <div class="step-description">An AML analyst is reviewing shareholder UBO trees and watchlist screening indicators.</div>
+            <div class="step-timestamp">⏱️ Estimated SLA: &lt; 4.0 Hours</div>
+          </div>
+        </div>
+
+        <div class="step-item animate-item delay-4">
+          <div class="step-icon">4</div>
+          <div class="step-content">
+            <div class="step-title">4. Account Activation & MAS Audit Ledger Logging</div>
+            <div class="step-description">Account credentials issued upon approval. Timestamped compliance record generated.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMITTED DATA PREVIEW SECTION -->
+      <div class="preview-container">
+        <div class="preview-header animate-item delay-4">
+          📋 Extracted Submission Summary
+        </div>
+
+        <!-- 1. CORPORATE PROFILE -->
+        <div class="preview-section animate-item delay-5">
+          <div class="preview-section-title">🏢 1. Corporate & Entity Profile</div>
+          <div class="grid-2">
+            <div class="info-item"><label>Company Legal Name</label><span id="prev-company">-</span></div>
+            <div class="info-item"><label>Singapore UEN</label><span id="prev-uen">-</span></div>
+            <div class="info-item"><label>Incorporation Date</label><span id="prev-inc-date">-</span></div>
+            <div class="info-item"><label>Jurisdiction</label><span id="prev-country">-</span></div>
+            <div class="info-item"><label>Primary SSIC Activity</label><span id="prev-ssic">-</span></div>
+            <div class="info-item"><label>Paid-Up Capital</label><span id="prev-capital">-</span></div>
+            <div class="info-item"><label>Registered Address</label><span id="prev-address">-</span></div>
+            <div class="info-item"><label>Website</label><span id="prev-website">-</span></div>
+          </div>
+        </div>
+
+        <!-- 2. DIRECTORS & SIGNATORIES -->
+        <div class="preview-section animate-item delay-6">
+          <div class="preview-section-title">👤 2. Primary Director Credentials</div>
+          <div class="grid-2">
+            <div class="info-item"><label>Full Name</label><span id="prev-director-name">-</span></div>
+            <div class="info-item"><label>NRIC / Passport</label><span id="prev-director-nric">-</span></div>
+            <div class="info-item"><label>Nationality</label><span id="prev-director-nationality">-</span></div>
+            <div class="info-item"><label>PEP Status</label><span id="prev-director-pep">-</span></div>
+            <div class="info-item" style="grid-column: 1 / -1;"><label>Residential Address</label><span id="prev-director-address">-</span></div>
+          </div>
+        </div>
+
+        <!-- 3. ULTIMATE BENEFICIAL OWNERSHIP -->
+        <div class="preview-section animate-item delay-6">
+          <div class="preview-section-title">🌳 3. Beneficial Owners (UBOs ≥ 25%)</div>
+          <div id="prev-ubos-container"></div>
+        </div>
+
+        <!-- 4 & 5. FINANCIAL PROFILE & TAX COMPLIANCE -->
+        <div class="preview-section animate-item delay-7">
+          <div class="preview-section-title">💰 4 & 5. Financial Profile, FATCA & Risk Metrics</div>
+          <div class="grid-2">
+            <div class="info-item"><label>Source of Wealth</label><span id="prev-sow">-</span></div>
+            <div class="info-item"><label>Projected Turnover</label><span id="prev-turnover">-</span></div>
+            <div class="info-item"><label>Max Single Tx</label><span id="prev-max-tx">-</span></div>
+            <div class="info-item"><label>Remittance Jurisdictions</label><span id="prev-countries">-</span></div>
+            <div class="info-item"><label>FATCA Classification</label><span id="prev-fatca">-</span></div>
+            <div class="info-item"><label>Tax ID (TIN / UEN)</label><span id="prev-tin">-</span></div>
+            <div class="info-item"><label>Regulated Licenses</label><span id="prev-licenses">-</span></div>
+            <div class="info-item"><label>Calculated Risk Score</label><span id="prev-risk">-</span></div>
+          </div>
+        </div>
+
+        <!-- 6. ATTACHED DOCUMENTS -->
+        <div class="preview-section animate-item delay-7">
+          <div class="preview-section-title">📁 6. Attached Verification Documents</div>
+          <div class="grid-2">
+            <div class="info-item"><label>ACRA BizFile Extract</label><span id="prev-doc-bizfile" class="doc-link">📄 -</span></div>
+            <div class="info-item"><label>Board Resolution</label><span id="prev-doc-board" class="doc-link">📄 -</span></div>
+            <div class="info-item" style="grid-column: 1 / -1;"><label>Commercial Substance Proof</label><span id="prev-doc-substance" class="doc-link">📄 -</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    RegEngine FinTech Workstation &copy; 2026 — MAS Notice 626 Compliance Standards.
+  </footer>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAndRenderStoredData();
+    });
+
+    function loadAndRenderStoredData() {
+      const rawData = sessionStorage.getItem('regengine_latest_app');
+
+      // Uses stored submission or falls back to sample submission data
+      const app = rawData ? JSON.parse(rawData) : {
+        companyName: "TechCorp Solutions Pte. Ltd.",
+        uen: "202412345K",
+        incDate: "2024-01-15",
+        countryInc: "Singapore",
+        ssic: "62011 - Development of software and applications",
+        capital: "500000",
+        address: "10 Marina Boulevard, #28-01, Marina Bay Financial Centre, Singapore 018983",
+        website: "https://www.techcorp.sg",
+        directorName: "Tan Wei Ming",
+        directorNric: "S9876543A",
+        directorNationality: "Singaporean",
+        directorPep: "NO",
+        directorAddress: "15 Orchard Turn, #12-04, Singapore 238854",
+        ubos: [
+          { name: "Tan Wei Ming", shares: "75", taxRes: "Singapore", pep: "NO" },
+          { name: "Nexus Ventures Ltd", shares: "25", taxRes: "British Virgin Islands", pep: "NO" }
+        ],
+        sow: "Retained Commercial Business Earnings / Operating Revenue",
+        turnover: "$1M - $5M",
+        maxTx: "250000",
+        countries: "Singapore, United Kingdom, United States",
+        fatca: "Active NFFE",
+        tin: "202412345K",
+        licenses: "None Specified",
+        documents: {
+          bizfile: "ACRA_BizFile_Extract_202412345K.pdf",
+          boardResolution: "Board_Resolution_Account_Opening.pdf",
+          substanceProof: "Office_Lease_Agreement_2026.pdf"
+        },
+        riskScore: 42,
+        riskLevel: "MEDIUM"
+      };
+
+      // 1. Header Banner
+      document.getElementById('display-uen').textContent = 'UEN: ' + (app.uen || '12345');
+
+      // 2. Entity Details
+      document.getElementById('prev-company').textContent = app.companyName || '-';
+      document.getElementById('prev-uen').textContent = app.uen || '-';
+      document.getElementById('prev-inc-date').textContent = app.incDate || '-';
+      document.getElementById('prev-country').textContent = app.countryInc || '-';
+      document.getElementById('prev-ssic').textContent = app.ssic || '-';
+      document.getElementById('prev-capital').textContent = app.capital ? 'SGD $' + parseInt(app.capital).toLocaleString() : '-';
+      document.getElementById('prev-address').textContent = app.address || '-';
+      document.getElementById('prev-website').textContent = app.website || '-';
+
+      // 3. Director Details
+      document.getElementById('prev-director-name').textContent = (app.directorName || '-') + ' (Singpass Verified)';
+      document.getElementById('prev-director-nric').textContent = app.directorNric || '-';
+      document.getElementById('prev-director-nationality').textContent = app.directorNationality || '-';
+      
+      const directorPepElement = document.getElementById('prev-director-pep');
+      const isDirectorPep = app.directorPep && app.directorPep.startsWith('YES');
+      directorPepElement.innerHTML = (app.directorPep || 'NO') + 
+        `<span class="badge-pep ${isDirectorPep ? 'badge-pep-yes' : 'badge-pep-no'}">${isDirectorPep ? 'PEP FLAG' : 'CLEAR'}</span>`;
+      
+      document.getElementById('prev-director-address').textContent = app.directorAddress || '-';
+
+      // 4. Render UBOs
+      const uboContainer = document.getElementById('prev-ubos-container');
+      uboContainer.innerHTML = '';
+
+      if (app.ubos && app.ubos.length > 0) {
+        app.ubos.forEach((ubo, index) => {
+          const isUboPep = ubo.pep && ubo.pep.startsWith('YES');
+          const uboCard = document.createElement('div');
+          uboCard.className = 'ubo-chip';
+          uboCard.innerHTML = `
+            <div class="grid-2">
+              <div class="info-item">
+                <label>UBO #${index + 1} Name</label>
+                <span>${ubo.name}</span>
+              </div>
+              <div class="info-item">
+                <label>Equity / Shareholding</label>
+                <span>${ubo.shares}%</span>
+              </div>
+              <div class="info-item">
+                <label>Tax Residency</label>
+                <span>${ubo.taxRes}</span>
+              </div>
+              <div class="info-item">
+                <label>PEP Flag</label>
+                <span>${ubo.pep} <span class="badge-pep ${isUboPep ? 'badge-pep-yes' : 'badge-pep-no'}">${isUboPep ? 'PEP FLAG' : 'CLEAR'}</span></span>
+              </div>
+            </div>
+          `;
+          uboContainer.appendChild(uboCard);
+        });
+      } else {
+        uboContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">No beneficial owners specified.</span>';
+      }
+
+      // 5. Financial & Tax Profile
+      document.getElementById('prev-sow').textContent = app.sow || '-';
+      document.getElementById('prev-turnover').textContent = app.turnover || '-';
+      document.getElementById('prev-max-tx').textContent = app.maxTx ? 'SGD $' + parseInt(app.maxTx).toLocaleString() : '-';
+      document.getElementById('prev-countries').textContent = app.countries || '-';
+      document.getElementById('prev-fatca').textContent = app.fatca || '-';
+      document.getElementById('prev-tin').textContent = app.tin || '-';
+      document.getElementById('prev-licenses').textContent = app.licenses || '-';
+
+      const riskSpan = document.getElementById('prev-risk');
+      riskSpan.textContent = `${app.riskScore || 42} / 100 (${app.riskLevel || 'MEDIUM'})`;
+      riskSpan.style.color = (app.riskLevel === 'HIGH') ? 'var(--status-danger)' : 'var(--status-success)';
+
+      // 6. Documents
+      if (app.documents) {
+        document.getElementById('prev-doc-bizfile').textContent = '📄 ' + (app.documents.bizfile || 'ACRA_BizFile.pdf');
+        document.getElementById('prev-doc-board').textContent = '📄 ' + (app.documents.boardResolution || 'Board_Resolution.pdf');
+        document.getElementById('prev-doc-substance').textContent = '📄 ' + (app.documents.substanceProof || 'Proof_Of_Substance.pdf');
+      }
+    }
+  </script>
+</body>
+</html>
