@@ -1,651 +1,753 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RegFlow — Institutional KYB & AML Access Portal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RegFlow</title>
+
+  <!-- FAVICON & TAB LOGO -->
+  <link rel="icon" type="image/png" href="logo-only.png" id="dynamic-favicon">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
-    /* ==========================================================================
-       1. SYSTEM COLOR VARIABLES & DARK ENTERPRISE THEME
-       ========================================================================== */
     :root {
-      --bg-main: #060913;
-      --bg-card: rgba(13, 20, 36, 0.7);
-      --bg-card-inner: rgba(21, 32, 54, 0.45);
-      --bg-card-hover: rgba(26, 40, 68, 0.65);
+      --bg-slate-950: #060911;
+      --bg-slate-900: #0b1120;
+      --bg-slate-850: #111827;
+      --bg-card-glass: rgba(15, 23, 42, 0.75);
       
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-card: rgba(255, 255, 255, 0.12);
-      --border-blue: rgba(56, 189, 248, 0.4);
-      --border-teal: rgba(45, 212, 191, 0.4);
-      
+      --border-bright: rgba(255, 255, 255, 0.15);
+
+      --blue-primary: #2563eb;
+      --blue-light: #60a5fa;
+      --blue-glow: rgba(59, 130, 246, 0.4);
+
+      --emerald-primary: #059669;
+      --emerald-light: #34d399;
+      --emerald-glow: rgba(16, 185, 129, 0.4);
+
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      
-      --accent-blue: #0284c7;
-      --accent-blue-light: #38bdf8;
-      --accent-blue-glow: rgba(2, 132, 199, 0.25);
-      
-      --accent-teal: #0d9488;
-      --accent-teal-light: #2dd4bf;
-      --accent-teal-glow: rgba(13, 148, 136, 0.25);
-      
-      --status-success: #10b981;
-      --status-success-glow: rgba(16, 185, 129, 0.4);
-      --font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --text-subtle: #475569;
+
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+
+      --easing: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
     body {
-      background-color: var(--bg-main);
+      background-color: var(--bg-slate-950);
       color: var(--text-main);
-      font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 3.5rem 1.5rem 2rem 1.5rem;
-      -webkit-font-smoothing: antialiased;
+      padding: 1.5rem 1.5rem 2rem 1.5rem;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* Ambient Background Lighting Effects */
-    body::before, body::after {
+    /* Ambient Lighting Layer */
+    body::before {
       content: "";
       position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(16, 185, 129, 0.05) 50%, transparent 80%);
       pointer-events: none;
       z-index: 0;
     }
 
-    body::before {
-      width: 500px;
-      height: 500px;
-      top: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Navigation Header */
+    .top-nav {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      z-index: 2;
     }
 
-    body::after {
-      width: 400px;
-      height: 400px;
-      bottom: 5%;
-      right: 10%;
-      background: radial-gradient(circle, rgba(13, 148, 136, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+    .env-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--emerald-light);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    /* ==========================================================================
-       2. ANIMATIONS
-       ========================================================================== */
-    @keyframes subtleFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .env-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald-light);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--emerald-light);
     }
 
-    @keyframes pulseRing {
-      0% {
-        transform: scale(0.95);
-        opacity: 0.8;
-      }
-      50% {
-        transform: scale(1.4);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(0.95);
-        opacity: 0;
-      }
-    }
-
-    @keyframes shine {
-      0% { left: -100%; }
-      100% { left: 200%; }
-    }
-
-    .fade-in {
-      animation: subtleFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* ==========================================================================
-       3. BRAND HEADER
-       ========================================================================== */
+    /* Main Header Area */
     .brand-header {
-      position: relative;
-      z-index: 1;
+      z-index: 2;
       text-align: center;
-      margin-bottom: 2.75rem;
+      margin: 1rem 0 2rem 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
     }
 
-    .brand-logo-img {
-      height: 76px;
-      width: auto;
-      object-fit: contain;
-      margin-bottom: 1rem;
-      filter: drop-shadow(0 4px 20px rgba(56, 189, 248, 0.25));
-      transition: transform 0.3s ease;
-    }
-
-    .brand-logo-img:hover {
-      transform: scale(1.02);
-    }
-
-    .brand-subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      max-width: 520px;
-      line-height: 1.5;
-      font-weight: 400;
-      letter-spacing: -0.01em;
-    }
-
-    .compliance-badge {
+    .logo-frame {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: 1.25rem;
-      padding: 0.35rem 0.95rem;
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 20px;
-      color: #34d399;
-      font-size: 0.725rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.08);
+      gap: 0.85rem;
+      padding: 0.6rem 1.4rem;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-bright);
+      border-radius: 100px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(56, 189, 248, 0.1);
+      margin-bottom: 1rem;
+      transition: all 0.3s var(--easing);
     }
 
-    .compliance-badge .badge-dot {
-      width: 6px;
-      height: 6px;
-      background-color: var(--status-success);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--status-success);
+    .logo-frame:hover {
+      border-color: rgba(96, 165, 250, 0.4);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5), 0 0 25px rgba(56, 189, 248, 0.2);
     }
 
-    /* ==========================================================================
-       4. GATEWAY CONTAINER & ROLE CARDS
-       ========================================================================== */
-    .gateway-container {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 860px;
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-card);
-      border-radius: 16px;
-      box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      overflow: hidden;
+    .logo-img {
+      height: 48px;
+      width: auto;
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
     }
 
-    .gateway-header {
-      padding: 2.25rem 2.5rem 1.5rem 2.5rem;
-      border-bottom: 1px solid var(--border-subtle);
-      background: rgba(255, 255, 255, 0.015);
-    }
-
-    .gateway-title {
-      font-size: 1.35rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 0.35rem;
+    .brand-title {
+      font-size: 1.75rem;
+      font-weight: 800;
       letter-spacing: -0.02em;
     }
 
-    .gateway-description {
-      color: var(--text-muted);
-      font-size: 0.875rem;
+    /* Subtitle Gradient Animation */
+    .brand-subtitle {
+      white-space: nowrap;
+      max-width: 100%;
+      font-size: clamp(0.725rem, 1.1vw, 0.925rem);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      background: linear-gradient(
+        90deg, 
+        #94a3b8 0%, 
+        #38bdf8 25%, 
+        #ffffff 50%, 
+        #34d399 75%, 
+        #94a3b8 100%
+      );
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: liveGradient 6s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.25));
     }
 
-    .roles-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      padding: 2.25rem 2.5rem;
+    @keyframes liveGradient {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
     }
 
-    @media (max-width: 768px) {
-      .roles-grid {
-        grid-template-columns: 1fr;
-        padding: 1.5rem;
-      }
-      .gateway-header {
-        padding: 1.5rem;
-      }
+    .compliance-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.3rem 0.85rem;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      color: var(--emerald-light);
+      font-size: 0.725rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
     }
 
-    .role-card {
-      background: var(--bg-card-inner);
+    /* Main Access Portal Window */
+    .portal-card {
+      z-index: 2;
+      width: 100%;
+      max-width: 960px;
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(24px);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 1.75rem 1.5rem 1.5rem 1.5rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-      position: relative;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
       overflow: hidden;
     }
 
-    .role-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: transparent;
-      transition: background-color 0.25s ease;
+    .portal-header {
+      padding: 2rem 2.5rem 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .role-card.sme:hover::before { background: var(--accent-blue-light); }
-    .role-card.analyst:hover::before { background: var(--accent-teal-light); }
-
-    .role-card:hover {
-      background-color: var(--bg-card-hover);
-      transform: translateY(-3px);
+    .portal-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
-    .role-card.sme:hover {
-      border-color: var(--border-blue);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--accent-blue-glow);
+    .portal-desc {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
     }
 
-    .role-card.analyst:hover {
-      border-color: var(--border-teal);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--accent-teal-glow);
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 2rem 2.5rem;
     }
 
-    .role-card:focus-visible {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+    .role-tile {
+      background: var(--bg-slate-900);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s var(--easing);
+      position: relative;
     }
 
-    .role-header {
+    .role-tile:hover {
+      transform: translateY(-4px);
+      background: var(--bg-slate-850);
+    }
+
+    .role-tile.sme:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--blue-glow);
+    }
+
+    .role-tile.analyst:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--emerald-glow);
+    }
+
+    .tile-header {
       display: flex;
       align-items: center;
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
-    .role-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+      background: var(--bg-slate-950);
       border: 1px solid var(--border-subtle);
       flex-shrink: 0;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      transition: border-color 0.25s ease;
     }
 
-    .role-card.sme:hover .role-icon-box { border-color: rgba(56, 189, 248, 0.4); }
-    .role-card.analyst:hover .role-icon-box { border-color: rgba(45, 212, 191, 0.4); }
+    .sme .icon-box { stroke: var(--blue-light); }
+    .analyst .icon-box { stroke: var(--emerald-light); }
 
-    .role-icon-svg {
-      width: 22px;
-      height: 22px;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .role-card.sme .role-icon-svg { stroke: var(--accent-blue-light); }
-    .role-card.analyst .role-icon-svg { stroke: var(--accent-teal-light); }
-
-    .role-title-group h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-main);
-      letter-spacing: -0.01em;
-    }
-
-    .role-title-group span {
-      font-size: 0.7rem;
-      color: var(--text-subtle);
+    .role-meta span {
+      font-size: 0.675rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       font-weight: 700;
+      color: var(--text-subtle);
       display: block;
-      margin-bottom: 0.15rem;
     }
 
-    .role-features {
+    .role-meta h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0.15rem;
+    }
+
+    .feature-list {
       list-style: none;
       margin-bottom: 1.75rem;
     }
 
-    .role-features li {
+    .feature-list li {
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 0.65rem;
+      margin-bottom: 0.6rem;
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      line-height: 1.4;
     }
 
-    .feature-check {
-      width: 18px;
-      height: 18px;
+    .check-icon {
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
       font-size: 0.65rem;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
-    .role-card.sme .feature-check {
-      background: rgba(2, 132, 199, 0.2);
-      color: var(--accent-blue-light);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+    .sme .check-icon {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--blue-light);
+      border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
-    .role-card.analyst .feature-check {
-      background: rgba(13, 148, 136, 0.2);
-      color: var(--accent-teal-light);
-      border: 1px solid rgba(45, 212, 191, 0.3);
+    .analyst .check-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--emerald-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
-    .btn-action {
-      position: relative;
+    /* --- BUTTONS: HOVER-ONLY ANIMATIONS --- */
+    .action-btn {
       width: 100%;
-      padding: 0.8rem 1rem;
-      border: 1px solid transparent;
-      border-radius: 8px;
+      padding: 0.85rem 1.2rem;
+      border: none;
+      border-radius: var(--radius-md);
       font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
-      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      letter-spacing: 0.01em;
+      gap: 0.6rem;
+      position: relative;
       overflow: hidden;
+      transition: all 0.3s var(--easing);
     }
 
-    .btn-action::after {
-      content: "";
+    .sme .action-btn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .analyst .action-btn {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .action-btn .btn-arrow {
+      transition: transform 0.3s var(--easing);
+    }
+
+    .btn-text-mobile {
+      display: none;
+    }
+
+    /* Light shimmer effect element */
+    .action-btn::after {
+      content: '';
       position: absolute;
       top: 0;
       left: -100%;
-      width: 50%;
+      width: 60%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
       transform: skewX(-20deg);
     }
 
-    .role-card:hover .btn-action::after {
-      animation: shine 1.2s ease;
+    /* HOVER TRIGGER ONLY */
+    .role-tile:hover .action-btn::after,
+    .action-btn:hover::after {
+      animation: btnShimmerHover 0.8s ease-out forwards;
     }
 
-    .role-card.sme .btn-action {
-      background: linear-gradient(135deg, var(--accent-blue) 0%, #0369a1 100%);
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    @keyframes btnShimmerHover {
+      0% { left: -100%; }
+      100% { left: 160%; }
     }
 
-    .role-card.sme .btn-action:hover {
-      background: linear-gradient(135deg, #0284c7 0%, #075985 100%);
-      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+    .role-tile:hover .action-btn,
+    .action-btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
     }
 
-    .role-card.analyst .btn-action {
-      background: linear-gradient(135deg, var(--accent-teal) 0%, #0f766e 100%);
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    .role-tile.sme:hover .action-btn {
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.6);
     }
 
-    .role-card.analyst .btn-action:hover {
-      background: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
-      box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45);
+    .role-tile.analyst:hover .action-btn {
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.6);
     }
 
-    /* ==========================================================================
-       5. SYSTEM STATUS FOOTER BAR
-       ========================================================================== */
-    .system-status-panel {
-      background: rgba(8, 12, 22, 0.85);
+    .role-tile:hover .action-btn .btn-arrow,
+    .action-btn:hover .btn-arrow {
+      transform: translateX(6px);
+    }
+
+    /* --- SYNCHRONIZED BOTTOM GREEN DOTS --- */
+    .system-bar {
+      background: var(--bg-slate-950);
       border-top: 1px solid var(--border-subtle);
-      padding: 1rem 2.5rem;
+      padding: 0.85rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
+      font-size: 0.75rem;
     }
 
-    .status-title {
-      font-size: 0.725rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    .system-label {
       color: var(--text-subtle);
       font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .status-items {
+    .status-group {
       display: flex;
-      gap: 1.75rem;
-      align-items: center;
+      gap: 1.5rem;
     }
 
-    .status-item {
+    .status-node {
       display: flex;
       align-items: center;
       gap: 0.55rem;
-      font-size: 0.8rem;
       color: var(--text-muted);
-      font-weight: 500;
     }
 
-    .status-dot-container {
+    .node-dot {
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 10px;
-      height: 10px;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
+      background: var(--emerald-light);
       border-radius: 50%;
-      background-color: var(--status-success);
+      box-shadow: 0 0 6px var(--emerald-light);
     }
 
-    .status-ring {
+    /* All 3 dots pulse together with identical timing */
+    .node-dot::before {
+      content: '';
       position: absolute;
-      width: 12px;
-      height: 12px;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: var(--emerald-light);
       border-radius: 50%;
-      border: 2px solid var(--status-success);
-      animation: pulseRing 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      transform: translate(-50%, -50%);
+      animation: radarPulseSync 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
     }
 
-    /* ==========================================================================
-       6. PAGE FOOTER
-       ========================================================================== */
+    @keyframes radarPulseSync {
+      0% {
+        width: 100%;
+        height: 100%;
+        opacity: 0.85;
+      }
+      100% {
+        width: 320%;
+        height: 320%;
+        opacity: 0;
+      }
+    }
+
     footer {
-      position: relative;
-      z-index: 1;
-      margin-top: 2.5rem;
-      text-align: center;
-      font-size: 0.8rem;
+      z-index: 2;
+      margin-top: 2rem;
+      font-size: 0.775rem;
       color: var(--text-subtle);
-      font-weight: 400;
+    }
+
+    /* --- MOBILE RESPONSIVE LAYOUT (KEEPS 2 BOXES SIDE-BY-SIDE) --- */
+    @media (max-width: 768px) {
+      body {
+        padding: 0.75rem 0.5rem 1.5rem 0.5rem;
+      }
+
+      .top-nav {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.25rem;
+      }
+
+      .brand-header {
+        margin: 0.5rem 0 1.25rem 0;
+      }
+
+      .brand-title {
+        font-size: 1.3rem;
+      }
+
+      .logo-img {
+        height: 36px;
+      }
+
+      .logo-frame {
+        padding: 0.4rem 1rem;
+      }
+
+      .brand-subtitle {
+        white-space: normal;
+        font-size: 0.725rem;
+        text-align: center;
+        padding: 0 0.5rem;
+      }
+
+      .portal-header {
+        padding: 1rem 1rem 0.75rem 1rem;
+        text-align: center;
+      }
+
+      .portal-title {
+        font-size: 1.1rem;
+      }
+
+      .portal-desc {
+        font-size: 0.75rem;
+      }
+
+      /* Keep side-by-side layout with adjusted spacing */
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+        padding: 0.75rem;
+      }
+
+      .role-tile {
+        padding: 0.85rem 0.65rem;
+        border-radius: 12px;
+      }
+
+      .tile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .icon-box {
+        width: 34px;
+        height: 34px;
+      }
+
+      .icon-box svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .role-meta h3 {
+        font-size: 0.85rem;
+        line-height: 1.15;
+      }
+
+      .role-meta span {
+        font-size: 0.55rem;
+      }
+
+      .feature-list {
+        margin-bottom: 0.85rem;
+      }
+
+      .feature-list li {
+        font-size: 0.675rem;
+        gap: 0.35rem;
+        margin-bottom: 0.4rem;
+      }
+
+      /* Hide low-priority extra feature bullets on mobile to keep height small */
+      .feature-list .secondary-feat {
+        display: none;
+      }
+
+      .check-icon {
+        width: 13px;
+        height: 13px;
+        font-size: 0.55rem;
+      }
+
+      /* Compact button styling on mobile */
+      .action-btn {
+        padding: 0.55rem 0.4rem;
+        font-size: 0.725rem;
+        gap: 0.25rem;
+      }
+
+      .btn-text-desktop {
+        display: none;
+      }
+
+      .btn-text-mobile {
+        display: inline;
+      }
+
+      /* Bottom Infrastructure Status Bar on Mobile */
+      .system-bar {
+        padding: 0.75rem 0.6rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .system-label {
+        font-size: 0.6rem;
+      }
+
+      .status-group {
+        gap: 0.65rem;
+        justify-content: center;
+      }
+
+      .status-node {
+        font-size: 0.65rem;
+        gap: 0.3rem;
+      }
+
+      footer {
+        font-size: 0.65rem;
+        text-align: center;
+      }
     }
   </style>
 </head>
-<body class="fade-in">
+<body>
+
+  <!-- TOP BAR -->
+  <div class="top-nav mono">
+    <div style="color: var(--text-subtle);">REGFLOW WORKSTATION v2.4</div>
+    <div class="env-tag"><span class="env-dot"></span> OPERATIONAL</div>
+  </div>
 
   <!-- BRAND HEADER -->
   <header class="brand-header">
-    <img src="logo-only.png" alt="RegFlow - Automated KYB & AML Compliance Platform" class="brand-logo-img">
-    <p class="brand-subtitle">Automated Corporate KYB Onboarding & Real-Time AML Compliance Engine</p>
-    <div class="compliance-badge">
-      <span class="badge-dot"></span> MAS Notice 626 Compliant Framework
+    <div class="logo-frame">
+      <img src="logo-only.png" alt="RegFlow Logo" class="logo-img">
+      <div class="brand-title">RegFlow</div>
     </div>
+    
+    <p class="brand-subtitle">Digital Onboarding & Biometric Verification Engine for Corporate SME Gateway</p>
   </header>
 
-  <!-- GATEWAY CONTAINER -->
-  <main class="gateway-container">
-    <div class="gateway-header">
-      <h2 class="gateway-title">Access Portal Workspace</h2>
-      <p class="gateway-description">Select your functional persona to enter the operational environment:</p>
+  <!-- ACCESS PORTAL CONTAINER -->
+  <main class="portal-card">
+    <div class="portal-header">
+      <h2 class="portal-title">Access Portal Workspace</h2>
+      <p class="portal-desc">Select your designated operational persona to continue:</p>
     </div>
 
-    <div class="roles-grid">
-      
-      <!-- ROLE 1: SME APPLICANT -->
-      <div class="role-card sme" tabindex="0" onclick="selectRole('SME_USER', 'sme-onboarding.html')">
+    <div class="options-grid">
+
+      <!-- SME APPLICANT -->
+      <div class="role-tile sme" onclick="window.location.href='onboarding.html'">
         <div>
-          <div class="role-header">
-            <div class="role-icon-box">
-              <svg class="role-icon-svg" viewBox="0 0 24 24">
+          <div class="tile-header">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path>
                 <path d="M1 21h22"></path>
-                <path d="M9 7h1"></path>
-                <path d="M9 11h1"></path>
-                <path d="M9 15h1"></path>
-                <path d="M14 7h1"></path>
-                <path d="M14 11h1"></path>
-                <path d="M14 15h1"></path>
+                <path d="M9 7h1"></path><path d="M9 11h1"></path><path d="M9 15h1"></path>
+                <path d="M14 7h1"></path><path d="M14 11h1"></path><path d="M14 15h1"></path>
               </svg>
             </div>
-            <div class="role-title-group">
+            <div class="role-meta">
               <span>Front-Office</span>
               <h3>SME Applicant Portal</h3>
             </div>
           </div>
-          <ul class="role-features">
-            <li><span class="feature-check">✓</span> Submit UEN & Entity Profile</li>
-            <li><span class="feature-check">✓</span> Singpass Myinfo Corporate Integration</li>
-            <li><span class="feature-check">✓</span> Upload Supporting Board Resolutions</li>
-            <li><span class="feature-check">✓</span> Track Onboarding Application Status</li>
+          <ul class="feature-list">
+            <li><span class="check-icon">✓</span> ACRA Entity Profile Retrieval</li>
+            <li><span class="check-icon">✓</span> Singpass MyInfo & Biometrics</li>
+            <li class="secondary-feat"><span class="check-icon">✓</span> Declare Beneficial Ownership (UBO)</li>
+            <li class="secondary-feat"><span class="check-icon">✓</span> Instant AML Screening & Risk Calculation</li>
           </ul>
         </div>
-        <button class="btn-action">
-          Enter Customer Portal ➔
+        <button class="action-btn">
+          <span class="btn-text-desktop">Start Onboarding Pipeline</span>
+          <span class="btn-text-mobile">Start Pipeline</span>
+          <span class="btn-arrow">→</span>
         </button>
       </div>
 
-      <!-- ROLE 2: COMPLIANCE OFFICER -->
-      <div class="role-card analyst" tabindex="0" onclick="selectRole('ANALYST_USER', 'analyst-queue.html')">
+      <!-- AML COMPLIANCE OFFICER -->
+      <div class="role-tile analyst" onclick="window.location.href='analyst-queue.html'">
         <div>
-          <div class="role-header">
-            <div class="role-icon-box">
-              <svg class="role-icon-svg" viewBox="0 0 24 24">
+          <div class="tile-header">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <path d="m9 12 2 2 4-4"></path>
               </svg>
             </div>
-            <div class="role-title-group">
+            <div class="role-meta">
               <span>Back-Office</span>
               <h3>AML Compliance Workstation</h3>
             </div>
           </div>
-          <ul class="role-features">
-            <li><span class="feature-check">✓</span> Manage Case Triage & SLA Queue</li>
-            <li><span class="feature-check">✓</span> ACRA Ownership & UBO Mapping</li>
-            <li><span class="feature-check">✓</span> Fuzzy PEP & Sanctions Screening</li>
-            <li><span class="feature-check">✓</span> Audit Logging & Determination Sign-off</li>
+          <ul class="feature-list">
+            <li><span class="check-icon">✓</span> Manage Case Triage & SLA Queue</li>
+            <li><span class="check-icon">✓</span> Fuzzy PEP & Sanctions Screening</li>
+            <li class="secondary-feat"><span class="check-icon">✓</span> ACRA Ownership & UBO Mapping</li>
+            <li class="secondary-feat"><span class="check-icon">✓</span> Audit Logging & Determination Sign-off</li>
           </ul>
         </div>
-        <button class="btn-action">
-          Enter Compliance Workstation ➔
+        <button class="action-btn">
+          <span class="btn-text-desktop">Enter Compliance Workstation</span>
+          <span class="btn-text-mobile">Enter Workstation</span>
+          <span class="btn-arrow">→</span>
         </button>
       </div>
 
     </div>
 
-    <!-- LIVE REGTECH API STATUS PANEL -->
-    <div class="system-status-panel">
-      <span class="status-title">System Infrastructure Status</span>
-      <div class="status-items">
-        <div class="status-item">
-          <div class="status-dot-container">
-            <span class="status-ring"></span>
-            <span class="status-dot"></span>
-          </div>
-          ACRA API
-        </div>
-        <div class="status-item">
-          <div class="status-dot-container">
-            <span class="status-ring"></span>
-            <span class="status-dot"></span>
-          </div>
-          Myinfo Singpass
-        </div>
-        <div class="status-item">
-          <div class="status-dot-container">
-            <span class="status-ring"></span>
-            <span class="status-dot"></span>
-          </div>
-          Sanctions Feed
-        </div>
+    <!-- FOOTER SYSTEM STATUS WITH SYNCHRONIZED BEACONS -->
+    <div class="system-bar mono">
+      <span class="system-label">Infrastructure Status</span>
+      <div class="status-group">
+        <div class="status-node"><span class="node-dot"></span> ACRA API</div>
+        <div class="status-node"><span class="node-dot"></span> MyInfo Singpass</div>
+        <div class="status-node"><span class="node-dot"></span> Sanctions Feed</div>
       </div>
     </div>
   </main>
 
   <!-- FOOTER -->
-  <footer>
-    RegFlow Workstation &copy; 2026 — Built for Regulatory Compliance.
+  <footer class="mono">
+    RegFlow &copy; 2026 — Enterprise Regulatory Compliance Security Framework
   </footer>
 
-  <!-- SESSION MANAGEMENT SCRIPT -->
-  <script>
-    function selectRole(role, targetPage) {
-      sessionStorage.setItem('regflow_user_role', role);
-      sessionStorage.setItem('regflow_login_time', new Date().toISOString());
-
-      if (role === 'SME_USER') {
-        sessionStorage.setItem('regflow_user_name', 'TechCorp Pte. Ltd. (Applicant)');
-      } else {
-        sessionStorage.setItem('regflow_user_name', 'J. Tan (Senior AML Officer)');
-      }
-
-      window.location.href = targetPage;
-    }
-
-    // Keyboard Access Support
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && document.activeElement.classList.contains('role-card')) {
-        document.activeElement.click();
-      }
-    });
-  </script>
 </body>
 </html>
