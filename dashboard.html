@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RegFlow | Corporate Dashboard & Analytics</title>
+  
+  <!-- FAVICON & TAB LOGO -->
+  <link rel="icon" type="image/png" href="logo-only.png" id="dynamic-favicon">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Base Color Palette */
+      --bg-slate-950: #060911;
+      --bg-slate-900: #0b1120;
+      --bg-slate-850: #111827;
+      --bg-card-glass: rgba(15, 23, 42, 0.75);
+
+      /* Borders & Accents */
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-bright: rgba(255, 255, 255, 0.15);
+      --border-focus: rgba(59, 130, 246, 0.5);
+
+      /* Primary Brand Tone (Blue) */
+      --blue-primary: #2563eb;
+      --blue-light: #60a5fa;
+      --blue-glow: rgba(59, 130, 246, 0.35);
+      --blue-alpha: rgba(37, 99, 235, 0.12);
+
+      /* Status - Success (Emerald) */
+      --emerald-primary: #059669;
+      --emerald-light: #34d399;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --emerald-alpha: rgba(16, 185, 129, 0.12);
+
+      /* Status - Warning (Amber) */
+      --amber-primary: #d97706;
+      --amber-light: #fbbf24;
+      --amber-glow: rgba(245, 158, 11, 0.35);
+      --amber-alpha: rgba(245, 158, 11, 0.12);
+
+      /* Status - Danger (Rose / Red) */
+      --rose-primary: #dc2626;
+      --rose-light: #f87171;
+      --rose-glow: rgba(239, 68, 68, 0.35);
+      --rose-alpha: rgba(239, 68, 68, 0.12);
+
+      /* Typography Colors */
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #475569;
+
+      /* Radii */
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+
+      /* Transitions */
+      --easing-standard: cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-base: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-slate-950);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Lighting Layer */
+    body::before {
+      content: "";
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(16, 185, 129, 0.05) 50%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Standard Header Navigation */
+    header {
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.9rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      cursor: pointer;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #fff;
+      box-shadow: 0 0 15px var(--blue-glow);
+      overflow: hidden;
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .brand-name { 
+      font-size: 1.15rem; 
+      font-weight: 800; 
+      letter-spacing: -0.02em; 
+      color: var(--text-main); 
+    }
+
+    .brand-tag {
+      background: var(--emerald-alpha);
+      color: var(--emerald-light);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.725rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .env-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--emerald-light);
+      background: var(--emerald-alpha);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .env-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald-light);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--emerald-light);
+    }
+
+    /* Main Dashboard Layout */
+    .dashboard-container {
+      max-width: 1500px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      width: 100%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      flex: 1;
+    }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .welcome-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    .welcome-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .status-pill {
+      background: var(--emerald-alpha);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--emerald-light);
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Metrics Grid */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .metric-card-label {
+      font-size: 0.775rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .metric-card-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .metric-card-footer {
+      font-size: 0.75rem;
+      color: var(--emerald-light);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Main Grid Panels */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .dash-panel {
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .dash-panel-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Details List */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.5rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .detail-item.full {
+      grid-column: span 2;
+    }
+
+    .detail-label {
+      font-size: 0.725rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      font-weight: 700;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* Document List & Download Links */
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .doc-row {
+      background: var(--bg-slate-900);
+      border: 1px solid var(--border-subtle);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition-base);
+    }
+
+    .doc-row:hover {
+      border-color: var(--border-bright);
+      background: var(--bg-slate-850);
+    }
+
+    .doc-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .doc-name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .doc-meta {
+      font-size: 0.725rem;
+      color: var(--text-muted);
+    }
+
+    .download-link {
+      background: var(--blue-alpha);
+      color: var(--blue-light);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.775rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: var(--transition-base);
+    }
+
+    .download-link:hover {
+      background: var(--blue-primary);
+      color: #fff;
+    }
+
+    /* UBO Table */
+    .ubo-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .ubo-table th {
+      text-align: left;
+      font-size: 0.725rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ubo-table td {
+      padding: 0.75rem;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 500;
+    }
+
+    /* Back to onboarding button */
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      background: var(--bg-slate-850);
+      color: var(--text-main);
+      border-color: var(--border-bright);
+    }
+
+    footer {
+      z-index: 2;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-slate-950);
+      margin-top: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .details-grid { grid-template-columns: 1fr; }
+      .detail-item.full { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STANDARD HEADER -->
+  <header>
+    <div class="brand-container" onclick="window.location.href='onboarding.html'">
+      <div class="brand-logo">
+        <img src="logo-only.png" alt="R" onerror="this.style.display='none'">
+      </div>
+      <div class="brand-name">RegFlow</div>
+      <span class="brand-tag">Client Command Center</span>
+    </div>
+    <div class="header-actions">
+      <a href="onboarding.html" class="btn-back">← Edit Onboarding Profile</a>
+      <div class="env-tag mono">
+        <span class="env-dot"></span> LIVE COMPLIANCE STATUS
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD CONTAINER -->
+  <div class="dashboard-container">
+    
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div>
+        <h1 class="welcome-title" id="dashCompanyName">Loading Entity Profile...</h1>
+        <p class="welcome-subtitle">Authorized Corporate Governance & Regulatory Dashboard under MAS Notice 626.</p>
+      </div>
+      <div class="status-pill">
+        <span>●</span> Verified & Approved Entity
+      </div>
+    </div>
+
+    <!-- METRICS ROW -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <span class="metric-card-label">Composite Risk Index</span>
+        <span class="metric-card-value mono" id="dashScore">12 / 100</span>
+        <span class="metric-card-footer">Low Risk Classification</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card-label">Biometric Verification</span>
+        <span class="metric-card-value mono" id="dashBio">98.9%</span>
+        <span class="metric-card-footer">Singpass Liveness Match</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card-label">ACRA Registry Status</span>
+        <span class="metric-card-value mono" style="color: var(--emerald-light);" id="dashAcraStatus">VERIFIED</span>
+        <span class="metric-card-footer">Live API Synchronized</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card-label">AML Watchlist Screen</span>
+        <span class="metric-card-value mono" style="color: var(--emerald-light);">0 HITS</span>
+        <span class="metric-card-footer">UN, OFAC & MAS Clear</span>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD GRID -->
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN: Corporate & Financial Profile -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Corporate Profile Panel -->
+        <div class="dash-panel">
+          <h2 class="dash-panel-title">🏢 Corporate & Entity Profile</h2>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Entity Legal Name</span>
+              <span class="detail-value" id="val-company">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Singapore UEN / Entity ID</span>
+              <span class="detail-value mono" id="val-uen">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Jurisdiction</span>
+              <span class="detail-value" id="val-country">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date of Incorporation</span>
+              <span class="detail-value mono" id="val-incdate">-</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">SSIC Code & Description</span>
+              <span class="detail-value" id="val-ssic">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Paid-Up Capital</span>
+              <span class="detail-value mono" id="val-capital">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Website Domain</span>
+              <span class="detail-value" id="val-website">-</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">Registered Business Address</span>
+              <span class="detail-value" id="val-address">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial & CDD Profile -->
+        <div class="dash-panel">
+          <h2 class="dash-panel-title">📈 Financial Activity & Source of Wealth</h2>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Primary Source of Wealth</span>
+              <span class="detail-value" id="val-sow">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Projected Annual Turnover</span>
+              <span class="detail-value mono" id="val-turnover">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Max Expected Single Transaction</span>
+              <span class="detail-value mono" id="val-maxtx">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Top Remittance Jurisdictions</span>
+              <span class="detail-value" id="val-remittance">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">FATCA Classification</span>
+              <span class="detail-value" id="val-fatca">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tax ID (TIN / UEN)</span>
+              <span class="detail-value mono" id="val-tin">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- UBO Ownership Matrix -->
+        <div class="dash-panel">
+          <h2 class="dash-panel-title">👥 Ultimate Beneficial Ownership (UBO) Matrix</h2>
+          <div id="dashUboContainer">
+            <div class="detail-value" style="color: var(--text-muted); font-size: 0.85rem;">No UBOs declared.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Director Details & Verified Documents -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Director Details -->
+        <div class="dash-panel">
+          <h2 class="dash-panel-title">👤 Primary Director Profile</h2>
+          <div class="details-grid" style="grid-template-columns: 1fr;">
+            <div class="detail-item">
+              <span class="detail-label">Full Legal Name</span>
+              <span class="detail-value" id="val-dir-name">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">NRIC / Passport Number</span>
+              <span class="detail-value mono" id="val-dir-id">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Nationality</span>
+              <span class="detail-value" id="val-dir-nationality">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">PEP Status</span>
+              <span class="detail-value" id="val-dir-pep">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Residential Address</span>
+              <span class="detail-value" id="val-dir-address">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verified Documents & Downloads -->
+        <div class="dash-panel">
+          <h2 class="dash-panel-title">📁 Verified Compliance Documents</h2>
+          <div class="doc-list" id="dashDocList">
+            <div class="doc-row">
+              <div class="doc-info">
+                <span class="doc-name" id="doc1-name">ACRA BizFile Extract</span>
+                <span class="doc-meta">Verified & Timestamped Extract</span>
+              </div>
+              <span id="doc1-action">-</span>
+            </div>
+            <div class="doc-row">
+              <div class="doc-info">
+                <span class="doc-name" id="doc2-name">Board Resolution</span>
+                <span class="doc-meta">Signed Corporate Resolution</span>
+              </div>
+              <span id="doc2-action">-</span>
+            </div>
+            <div class="doc-row">
+              <div class="doc-info">
+                <span class="doc-name" id="doc3-name">Commercial Proof</span>
+                <span class="doc-meta">Lease Agreement / Contracts</span>
+              </div>
+              <span id="doc3-action">-</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="mono">
+    RegFlow Dashboard &copy; 2026 — Enterprise Regulatory Compliance Security Framework
+  </footer>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDashboardData();
+    });
+
+    function loadDashboardData() {
+      // 1. Corporate Profile
+      const companyName = localStorage.getItem('regflow_inpCompany') || 'Registered Entity Pte. Ltd.';
+      document.getElementById('dashCompanyName').innerText = companyName;
+      document.getElementById('val-company').innerText = companyName;
+      document.getElementById('val-uen').innerText = localStorage.getItem('regflow_inpUen') || '202412345K';
+      document.getElementById('val-country').innerText = localStorage.getItem('regflow_selCountry') || 'Singapore';
+      document.getElementById('val-incdate').innerText = localStorage.getItem('regflow_incDate') || '2024-01-01';
+      document.getElementById('val-ssic').innerText = localStorage.getItem('regflow_selSsic') || '62011 - Development of software and applications';
+      
+      const capital = localStorage.getItem('regflow_inpCapital');
+      document.getElementById('val-capital').innerText = capital ? `$${Number(capital).toLocaleString()} SGD` : '$500,000 SGD';
+      document.getElementById('val-website').innerText = localStorage.getItem('regflow_inpWebsite') || 'https://www.company.sg';
+      document.getElementById('val-address').innerText = localStorage.getItem('regflow_inpAddress') || '71 Ayer Rajah Crescent, #02-18, Singapore 139951';
+
+      // 2. Director Details
+      document.getElementById('val-dir-name').innerText = localStorage.getItem('regflow_inpName') || 'ALEX TAN WEI MING';
+      document.getElementById('val-dir-id').innerText = localStorage.getItem('regflow_inpId') || 'S8812345A';
+      document.getElementById('val-dir-nationality').innerText = localStorage.getItem('regflow_selNationality') || 'Singaporean';
+      document.getElementById('val-dir-pep').innerText = localStorage.getItem('regflow_selPep') || 'No — Not a PEP or close associate';
+      document.getElementById('val-dir-address').innerText = localStorage.getItem('regflow_inpResAddress') || '123 ANG MO KIO AVE 3, #08-456, SINGAPORE 560123';
+
+      // 3. Financial Activity
+      document.getElementById('val-sow').innerText = localStorage.getItem('regflow_selSow') || 'Equity Investor Capital / Venture Capital';
+      document.getElementById('val-turnover').innerText = localStorage.getItem('regflow_selTurnover') || 'SGD $1,000,000 - $5,000,000';
+      
+      const maxTx = localStorage.getItem('regflow_inpMaxTx');
+      document.getElementById('val-maxtx').innerText = maxTx ? `$${Number(maxTx).toLocaleString()} SGD` : '$250,000 SGD';
+      document.getElementById('val-remittance').innerText = localStorage.getItem('regflow_inpRemittance') || 'Singapore, United States, Hong Kong';
+      document.getElementById('val-fatca').innerText = localStorage.getItem('regflow_selFatca') || 'Active NFFE';
+      document.getElementById('val-tin').innerText = localStorage.getItem('regflow_inpTin') || '202399881M';
+
+      // 4. UBO Matrix
+      const uboContainer = document.getElementById('dashUboContainer');
+      const savedUbos = localStorage.getItem('regflow_ubos');
+      if (savedUbos) {
+        try {
+          const ubos = JSON.parse(savedUbos);
+          if (Array.isArray(ubos) && ubos.length > 0) {
+            uboContainer.innerHTML = `
+              <table class="ubo-table">
+                <thead>
+                  <tr>
+                    <th>Beneficial Owner</th>
+                    <th>Equity %</th>
+                    <th>Tax Residence</th>
+                    <th>PEP Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${ubos.map(u => `
+                    <tr>
+                      <td style="font-weight: 700;">${u.name || 'N/A'}</td>
+                      <td class="mono">${u.shares ? u.shares + '%' : 'N/A'}</td>
+                      <td>${u.taxRes || 'N/A'}</td>
+                      <td>${u.pep || 'N/A'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        } catch(e) {
+          console.error('Error loading UBOs on dashboard:', e);
+        }
+      }
+
+      // 5. Documents & Download Links
+      ['doc1', 'doc2', 'doc3'].forEach(docId => {
+        const data = localStorage.getItem(`regflow_doc_data_${docId}`);
+        const actionEl = document.getElementById(`${docId}-action`);
+        
+        // Retrieve custom filename if saved in onboarding or fallback to default labels
+        let fileName = 'Document.pdf';
+        if (docId === 'doc1') fileName = 'ACRA_BizFile_Extract.pdf';
+        if (docId === 'doc2') fileName = 'Board_Resolution.pdf';
+        if (docId === 'doc3') fileName = 'Commercial_Proof.pdf';
+
+        if (data) {
+          actionEl.innerHTML = `<a class="download-link" href="${data}" download="${fileName}">📥 Download PDF</a>`;
+        } else {
+          // Fallback demo blob if not explicitly uploaded in session
+          const demoBlob = `data:application/pdf;base64,JVBERi0xLjQKJSDT01QTElBTkNFIEJFWkZJTEUgRVhUUkFDVAo=`;
+          actionEl.innerHTML = `<a class="download-link" href="${demoBlob}" download="${fileName}">📥 Download PDF</a>`;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
