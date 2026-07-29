@@ -1071,6 +1071,168 @@
       color: var(--rose-light);
     }
 
+    /* n8n Chatbot Widget Styles (Bottom Right Floating) */
+    .chat-widget-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--blue-primary), #1d4ed8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--blue-glow);
+      z-index: 1000;
+      transition: var(--transition-base);
+      animation: fabPulse 2s infinite var(--easing-standard);
+    }
+    .chat-widget-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 25px var(--blue-glow);
+    }
+    .chat-widget-fab svg {
+      width: 28px;
+      height: 28px;
+      fill: #ffffff;
+    }
+    @keyframes fabPulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 380px;
+      height: 520px;
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+      display: none;
+      flex-direction: column;
+      z-index: 1001;
+      overflow: hidden;
+      transform: translateY(20px) scale(0.95);
+      opacity: 0;
+      transition: opacity 0.3s var(--easing-standard), transform 0.3s var(--easing-standard);
+    }
+    .chat-window.open {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .chat-header {
+      padding: 1rem 1.25rem;
+      background: rgba(11, 17, 32, 0.8);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-header-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .chat-header-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--emerald-light);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--emerald-light);
+    }
+    .chat-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+    .chat-close-btn:hover {
+      color: var(--text-main);
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-bubble {
+      max-width: 80%;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      line-height: 1.4;
+      animation: bubbleSlide 0.3s var(--easing-bounce) forwards;
+      word-break: break-word;
+    }
+    @keyframes bubbleSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-bubble.bot {
+      background: var(--bg-slate-900);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .chat-bubble.user {
+      background: var(--blue-primary);
+      color: #ffffff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-input-area {
+      padding: 0.85rem 1rem;
+      background: rgba(11, 17, 32, 0.8);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-slate-900);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition-base);
+    }
+    .chat-input:focus {
+      border-color: var(--blue-primary);
+      box-shadow: 0 0 0 2px var(--blue-glow);
+    }
+    .chat-send-btn {
+      background: var(--blue-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0 1rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+    .chat-send-btn:hover {
+      filter: brightness(1.1);
+    }
+
     footer {
       z-index: 2;
       padding: 1.5rem;
@@ -1095,6 +1257,15 @@
       .singpass-box-container { flex-direction: column; align-items: flex-start; }
       .btn-singpass-red { width: 100%; text-align: center; justify-content: center; }
       .outcome-button-group { flex-direction: column; }
+    }
+
+    @media (max-width: 480px) {
+      .chat-window {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 86px;
+        height: 460px;
+      }
     }
   </style>
 </head>
@@ -1990,6 +2161,27 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- n8n Chatbot Floating Widget (Bottom Right) -->
+  <div class="chat-widget-fab" onclick="toggleChatWindow()" title="Open RegFlow Assistant">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0-2-.9-2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  </div>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <span class="chat-header-dot"></span> RegFlow Assistant
+      </div>
+      <button class="chat-close-btn" onclick="toggleChatWindow()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-bubble bot">Hello! I am your RegFlow compliance and onboarding assistant. How can I help you today?</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendChatMessage()" />
+      <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="mono">
     RegFlow Engine &copy; 2026 — Enterprise Regulatory Compliance Security Framework
@@ -2331,7 +2523,6 @@
     }
 
     function initLocalStorageListeners() {
-      // Single event listener for standard inputs
       inputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -2580,593 +2771,62 @@
       evaluateFinalDecision();
     }
 
-    /* COMPREHENSIVE PREVIEW ENGINE WITH DOWNLOAD LINKS AND DROPDOWNS */
-    function populatePreview() {
-      // 1. Corporate Profile
-      document.getElementById('prev-country').innerText = localStorage.getItem('regflow_selCountry') || 'Not Selected';
-      document.getElementById('prev-uen').innerText = localStorage.getItem('regflow_inpUen') || 'Not Provided';
-      document.getElementById('prev-company').innerText = localStorage.getItem('regflow_inpCompany') || 'Not Provided';
-      document.getElementById('prev-incdate').innerText = localStorage.getItem('regflow_incDate') || 'Not Provided';
-      document.getElementById('prev-ssic').innerText = localStorage.getItem('regflow_selSsic') || 'Not Selected';
-      document.getElementById('prev-capital').innerText = localStorage.getItem('regflow_inpCapital') ? `$${Number(localStorage.getItem('regflow_inpCapital')).toLocaleString()} SGD` : 'Not Provided';
-      document.getElementById('prev-website').innerText = localStorage.getItem('regflow_inpWebsite') || 'Not Provided';
-      document.getElementById('prev-address').innerText = localStorage.getItem('regflow_inpAddress') || 'Not Provided';
+    /* n8n Chatbot Script */
+    function toggleChatWindow() {
+      const chatWin = document.getElementById('chatWindow');
+      if (chatWin.classList.contains('open')) {
+        chatWin.classList.remove('open');
+      } else {
+        chatWin.classList.add('open');
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+      }
+    }
 
-      // 2. Primary Director Details
-      document.getElementById('prev-dir-name').innerText = localStorage.getItem('regflow_inpName') || 'Not Provided';
-      document.getElementById('prev-dir-id').innerText = localStorage.getItem('regflow_inpId') || 'Not Provided';
-      document.getElementById('prev-dir-nationality').innerText = localStorage.getItem('regflow_selNationality') || 'Not Selected';
-      document.getElementById('prev-dir-pep').innerText = localStorage.getItem('regflow_selPep') || 'Not Selected';
-      document.getElementById('prev-dir-address').innerText = localStorage.getItem('regflow_inpResAddress') || 'Not Provided';
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const messagesContainer = document.getElementById('chatMessages');
+      const text = input.value.trim();
+      if (!text) return;
 
-      // 3. UBO Matrix Dynamic Render
-      const uboContainer = document.getElementById('prev-ubo-list');
-      const savedUbos = localStorage.getItem('regflow_ubos');
-      if (savedUbos) {
-        try {
-          const ubos = JSON.parse(savedUbos);
-          if (Array.isArray(ubos) && ubos.length > 0) {
-            uboContainer.innerHTML = ubos.map((u, i) => `
-              <div class="ubo-preview-card">
-                <div style="font-weight:700; color:var(--blue-light); font-size:0.8rem; margin-bottom:0.25rem;">UBO #${i+1}: ${u.name || 'N/A'}</div>
-                <div class="preview-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                  <div><span class="preview-label">Equity Ownership:</span> <span class="preview-val-text">${u.shares ? u.shares + '%' : 'N/A'}</span></div>
-                  <div><span class="preview-label">Tax Residence:</span> <span class="preview-val-text">${u.taxRes || 'N/A'}</span></div>
-                  <div><span class="preview-label">PEP Status:</span> <span class="preview-val-text">${u.pep || 'N/A'}</span></div>
-                </div>
-              </div>
-            `).join('');
+      // Append User Bubble
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble user';
+      userBubble.innerText = text;
+      messagesContainer.appendChild(userBubble);
+      input.value = '';
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Append Bot Bubble Loading Indicator
+      const botBubble = document.createElement('div');
+      botBubble.className = 'chat-bubble bot';
+      botBubble.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> Thinking...';
+      messagesContainer.appendChild(botBubble);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      try {
+        const response = await fetch('https://n8ngc.codeblazar.org/webhook/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        
+        let reply = "I received your message. How can I assist you with RegFlow onboarding?";
+        if (response.ok) {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            reply = data.output || data.response || data.message || JSON.stringify(data);
           } else {
-            uboContainer.innerHTML = `<div class="preview-val-text" style="color: var(--text-muted); font-size: 0.8rem;">No UBOs declared.</div>`;
+            reply = await response.text();
           }
-        } catch(e) {
-          uboContainer.innerHTML = `<div class="preview-val-text" style="color: var(--text-muted); font-size: 0.8rem;">Error loading UBO matrix.</div>`;
         }
-      }
-
-      // 4. Documents & Files
-      const doc1El = document.getElementById('prev-doc-1');
-      if (AppState.documentBlobs.doc1) {
-        doc1El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc1}" download="${AppState.documentNames.doc1 || 'ACRA_BizFile.pdf'}">📥 ${AppState.documentNames.doc1 || 'ACRA_BizFile.pdf'}</a>`;
-      } else {
-        doc1El.innerText = 'Not Uploaded';
-      }
-
-      const doc2El = document.getElementById('prev-doc-2');
-      if (AppState.documentBlobs.doc2) {
-        doc2El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc2}" download="${AppState.documentNames.doc2 || 'Board_Resolution.pdf'}">📥 ${AppState.documentNames.doc2 || 'Board_Resolution.pdf'}</a>`;
-      } else {
-        doc2El.innerText = 'Not Uploaded';
-      }
-
-      const doc3El = document.getElementById('prev-doc-3');
-      if (AppState.documentBlobs.doc3) {
-        doc3El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc3}" download="${AppState.documentNames.doc3 || 'Commercial_Proof.pdf'}">📥 ${AppState.documentNames.doc3 || 'Commercial_Proof.pdf'}</a>`;
-      } else {
-        doc3El.innerText = 'Not Uploaded';
-      }
-
-      // 5. Financial Profile & Regulatory Screening
-      document.getElementById('prev-sow').innerText = localStorage.getItem('regflow_selSow') || 'Not Selected';
-      document.getElementById('prev-turnover').innerText = localStorage.getItem('regflow_selTurnover') || 'Not Selected';
-      document.getElementById('prev-maxtx').innerText = localStorage.getItem('regflow_inpMaxTx') ? `$${Number(localStorage.getItem('regflow_inpMaxTx')).toLocaleString()} SGD` : 'Not Provided';
-      document.getElementById('prev-remittance').innerText = localStorage.getItem('regflow_inpRemittance') || 'Not Provided';
-      document.getElementById('prev-fatca').innerText = localStorage.getItem('regflow_selFatca') || 'Not Selected';
-      document.getElementById('prev-tin').innerText = localStorage.getItem('regflow_inpTin') || 'Not Provided';
-    }
-
-    function updateTopProgress(step) {
-      document.getElementById('topProgressFill').style.width = ((step / 8) * 100) + '%';
-    }
-
-    function showToast(text, isError = false) {
-      const container = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${isError ? 'toast-error' : ''}`;
-      t.innerHTML = `<span>${isError ? '⚠️' : 'ℹ'}</span> <span>${text}</span>`;
-      container.appendChild(t);
-      setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transform = 'translateX(20px)';
-        t.style.transition = 'all 0.35s var(--easing-standard)';
-        setTimeout(() => t.remove(), 350);
-      }, 3200);
-    }
-
-    function navigate(step) {
-      if (step > AppState.currentStep) {
-        if (!validateCurrentStepRequiredFields(AppState.currentStep)) return;
-      }
-
-      const currentPanel = document.getElementById(`panel-${AppState.currentStep}`);
-      const nextPanel = document.getElementById(`panel-${step}`);
-
-      if (currentPanel) {
-        currentPanel.style.opacity = '0';
-        currentPanel.style.transform = 'translateY(-15px) scale(0.98)';
-        setTimeout(() => {
-          currentPanel.classList.remove('active');
-          activateNextPanel(nextPanel, step);
-        }, 200);
-      } else {
-        activateNextPanel(nextPanel, step);
-      }
-    }
-
-    function activateNextPanel(nextPanel, step) {
-      nextPanel.classList.add('active');
-      setTimeout(() => {
-        nextPanel.style.opacity = '1';
-        nextPanel.style.transform = 'translateY(0) scale(1)';
-      }, 50);
-
-      document.querySelectorAll('.workflow-item').forEach(item => {
-        const s = parseInt(item.getAttribute('data-step'));
-        item.classList.remove('active', 'completed');
-        if (s === step) item.classList.add('active');
-        else if (s < step) {
-          item.classList.add('completed');
-          item.querySelector('.workflow-node').innerText = '✓';
-        } else {
-          item.querySelector('.workflow-node').innerText = s;
-        }
-      });
-
-      AppState.currentStep = step;
-      updateTopProgress(step);
-
-      if (step === 8) populatePreview();
-    }
-
-    function submitConsent() {
-      if (!validateCurrentStepRequiredFields(1)) return;
-      AppState.consent = true;
-      const sig = document.getElementById('sig-consent');
-      sig.innerText = 'Captured';
-      sig.className = 'telemetry-val pass';
-      saveAllState();
-      navigate(2);
-    }
-
-    function runAcraQuery() {
-      if (!validateCurrentStepRequiredFields(2)) return;
-
-      if (AppState.acraVerified) {
-        navigate(3);
-        return;
-      }
-
-      const uen = document.getElementById('inpUen').value.trim();
-      const comp = document.getElementById('inpCompany').value.trim();
-      const btn = document.getElementById('btnAcra');
-      const box = document.getElementById('acraConsole');
-
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> SCANNING...`;
-      box.style.display = 'flex';
-      box.innerHTML = '';
-
-      const logs = [
-        `[QUERY] Connecting to ACRA API Gateway...`,
-        `[FOUND] Registration Record Match: "${uen.toUpperCase()}"`,
-        `[STATUS] Entity Name: "${comp}" | Status: LIVE`,
-        `[CHECKSUM] Algorithmic Registry Signature Verified.`
-      ];
-
-      let idx = 0;
-      const interval = setInterval(() => {
-        if (idx < logs.length) {
-          const l = document.createElement('div');
-          l.className = 'console-line';
-          l.innerText = logs[idx];
-          box.appendChild(l);
-          box.scrollTop = box.scrollHeight;
-          idx++;
-        } else {
-          clearInterval(interval);
-          AppState.acraVerified = true;
-
-          btn.disabled = false;
-          btn.innerHTML = `CONTINUE`;
-
-          const sig = document.getElementById('sig-acra');
-          sig.innerText = 'Verified';
-          sig.className = 'telemetry-val pass';
-
-          saveAllState();
-          showToast('ACRA Scan Complete! Click CONTINUE to proceed.');
-        }
-      }, 500);
-    }
-
-    /* Biometric Sequence Engine */
-    let videoStream = null;
-    let animId = null;
-
-    async function startSingpassFlow() {
-      const btnSingpass = document.getElementById('btnSingpassTrigger');
-      const wrapper = document.getElementById('bioWrapper');
-      
-      btnSingpass.disabled = true;
-      btnSingpass.innerHTML = `<span class="spinner"></span> Connecting Singpass...`;
-
-      wrapper.style.display = 'flex';
-      wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      const video = document.getElementById('webcam');
-      try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = videoStream;
+        botBubble.innerText = reply;
       } catch (err) {
-        console.warn('Camera stream direct capture fallback applied.');
+        console.error('Chat webhook error:', err);
+        botBubble.innerText = "Connection error. Please try again or continue with the onboarding pipeline.";
       }
-
-      renderBiometricCanvas();
-      executeLivenessSequence();
-    }
-
-    function renderBiometricCanvas() {
-      const canvas = document.getElementById('bioCanvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = canvas.offsetWidth || 200;
-      canvas.height = canvas.offsetHeight || 200;
-
-      let frame = 0;
-      function loop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 65 + Math.sin(frame * 0.08) * 4, 0, Math.PI * 2);
-        ctx.stroke();
-
-        frame++;
-        animId = requestAnimationFrame(loop);
-      }
-      loop();
-    }
-
-    function executeLivenessSequence() {
-      const prompt = document.getElementById('bioPrompt');
-      const subPrompt = document.getElementById('bioSubPrompt');
-
-      const motions = [
-        { text: "Align face inside oval frame 🎯", sub: "Detecting facial coordinates..." },
-        { text: "Slowly turn your head to the LEFT ⬅️", sub: "Motion vector detected: yaw +24°" },
-        { text: "Slowly turn your head to the RIGHT ➡️", sub: "Motion vector detected: yaw -22°" },
-        { text: "Blink both eyes slowly 👁️", sub: "Liveness blink signature verified" },
-        { text: "Hold still for final biometric snapshot 📸", sub: "Extracting 128-D facial vector mesh..." }
-      ];
-
-      let step = 0;
-      const interval = setInterval(() => {
-        if (step < motions.length) {
-          prompt.innerText = motions[step].text;
-          subPrompt.innerText = motions[step].sub;
-          step++;
-        } else {
-          clearInterval(interval);
-          if (animId) cancelAnimationFrame(animId);
-
-          AppState.biometricScore = (98.6 + Math.random() * 1.1).toFixed(1);
-          AppState.facePassed = true;
-
-          if (videoStream) {
-            videoStream.getTracks().forEach(t => t.stop());
-          }
-
-          const bioWrapper = document.getElementById('bioWrapper');
-          if (bioWrapper) bioWrapper.style.display = 'none';
-
-          autofillDirectorData("ALEX TAN WEI MING", "S8812345A", "Singaporean", "123 ANG MO KIO AVE 3, #08-456, SINGAPORE 560123");
-        }
-      }, 1200);
-    }
-
-    function autofillDirectorData(name, id, nationality, address, notify = true) {
-      const btnSingpass = document.getElementById('btnSingpassTrigger');
-      if (btnSingpass) {
-        btnSingpass.innerText = 'MyInfo Retrieved ✓';
-        btnSingpass.disabled = true;
-        btnSingpass.style.backgroundColor = 'var(--emerald-primary)';
-      }
-
-      const nameInp = document.getElementById('inpName');
-      const idInp = document.getElementById('inpId');
-      const natSel = document.getElementById('selNationality');
-      const addrInp = document.getElementById('inpResAddress');
-
-      if (nameInp) { nameInp.value = name; nameInp.readOnly = true; }
-      if (idInp) { idInp.value = id; idInp.readOnly = true; }
-      if (natSel) { natSel.value = nationality; natSel.disabled = true; }
-      if (addrInp) { addrInp.value = address; addrInp.readOnly = true; }
-
-      AppState.singpassRetrieved = true;
-      AppState.facePassed = true;
-
-      const sig = document.getElementById('sig-bio');
-      if (sig) {
-        sig.innerText = `${AppState.biometricScore || '98.8'}% Match`;
-        sig.className = 'telemetry-val pass';
-      }
-
-      localStorage.setItem('regflow_singpass_done', 'true');
-      saveAllState();
-      
-      if (notify) {
-        showToast('Singpass MyInfo verified! Fields populated and locked.');
-      }
-    }
-
-    function handleBioNextStep() {
-      if (!validateCurrentStepRequiredFields(3)) return;
-      saveAllState();
-      navigate(4);
-    }
-
-    let uboCounter = 1;
-
-    function saveUboState() {
-      const uboCards = document.querySelectorAll('.ubo-item');
-      const ubos = [];
-      uboCards.forEach(card => {
-        const name = card.querySelector('.ubo-name')?.value || '';
-        const shares = card.querySelector('.ubo-shares')?.value || '';
-        const taxRes = card.querySelector('.ubo-tax-res')?.value || '';
-        const pep = card.querySelector('.ubo-pep')?.value || 'No — Not a PEP';
-        ubos.push({ name, shares, taxRes, pep });
-      });
-      localStorage.setItem('regflow_ubos', JSON.stringify(ubos));
-    }
-
-    function restoreUboState() {
-      const saved = localStorage.getItem('regflow_ubos');
-      if (!saved) return;
-      try {
-        const ubos = JSON.parse(saved);
-        if (!Array.isArray(ubos) || ubos.length === 0) return;
-
-        const container = document.getElementById('ubo-container');
-        container.innerHTML = '';
-        uboCounter = 0;
-
-        ubos.forEach(item => {
-          uboCounter++;
-          const uboCard = document.createElement('div');
-          uboCard.className = 'repeater-box ubo-item';
-          uboCard.innerHTML = `
-            <div class="repeater-header">
-              <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${uboCounter}</span>
-              ${uboCounter > 1 ? '<button type="button" class="btn-remove-ubo" onclick="this.closest(\'.ubo-item\').remove(); saveAllState();">Remove UBO ✕</button>' : ''}
-            </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>UBO Full Name *</label>
-                <input type="text" class="ubo-name" value="${item.name || ''}" required placeholder="Enter UBO's full legal name" />
-              </div>
-              <div class="form-group">
-                <label>Ownership / Voting Rights % *</label>
-                <input type="number" class="ubo-shares" value="${item.shares || ''}" required placeholder="Enter Percentage" min="1" max="100" />
-              </div>
-              <div class="form-group">
-                <label>Tax Residence Jurisdiction *</label>
-                <input type="text" class="ubo-tax-res" value="${item.taxRes || ''}" required placeholder="Enter tax residence" />
-              </div>
-              <div class="form-group">
-                <label>PEP Status *</label>
-                <select class="ubo-pep" required>
-                  <option value="No — Not a PEP" ${item.pep === 'No — Not a PEP' ? 'selected' : ''}>No — Not a PEP</option>
-                  <option value="Yes — Domestic PEP" ${item.pep === 'Yes — Domestic PEP' ? 'selected' : ''}>Yes — Domestic PEP</option>
-                  <option value="Yes — Foreign PEP" ${item.pep === 'Yes — Foreign PEP' ? 'selected' : ''}>Yes — Foreign PEP</option>
-                  <option value="Yes — International Org PEP" ${item.pep === 'Yes — International Org PEP' ? 'selected' : ''}>Yes — International Org PEP</option>
-                  <option value="Yes — Family / Associate of PEP" ${item.pep === 'Yes — Family / Associate of PEP' ? 'selected' : ''}>Yes — Family / Associate of PEP</option>
-                </select>
-              </div>
-            </div>
-          `;
-          container.appendChild(uboCard);
-        });
-
-        container.querySelectorAll('input, select').forEach(el => {
-          el.addEventListener('input', saveAllState);
-          el.addEventListener('change', saveAllState);
-        });
-      } catch(e) {
-        console.error('Error restoring UBOs:', e);
-      }
-    }
-
-    function addUboField() {
-      uboCounter++;
-      const container = document.getElementById('ubo-container');
-      const uboCard = document.createElement('div');
-      uboCard.className = 'repeater-box ubo-item';
-      uboCard.innerHTML = `
-        <div class="repeater-header">
-          <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${uboCounter}</span>
-          <button type="button" class="btn-remove-ubo" onclick="this.closest('.ubo-item').remove(); saveAllState();">Remove UBO ✕</button>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>UBO Full Name *</label>
-            <input type="text" class="ubo-name" required placeholder="Enter UBO's full legal name" />
-          </div>
-          <div class="form-group">
-            <label>Ownership / Voting Rights % *</label>
-            <input type="number" class="ubo-shares" required placeholder="Enter Percentage" min="1" max="100" />
-          </div>
-          <div class="form-group">
-            <label>Tax Residence Jurisdiction *</label>
-            <input type="text" class="ubo-tax-res" required placeholder="Enter tax residence" />
-          </div>
-          <div class="form-group">
-            <label>PEP Status *</label>
-            <select class="ubo-pep" required>
-              <option value="No — Not a PEP">No — Not a PEP</option>
-              <option value="Yes — Domestic PEP">Yes — Domestic PEP</option>
-              <option value="Yes — Foreign PEP">Yes — Foreign PEP</option>
-              <option value="Yes — International Org PEP">Yes — International Org PEP</option>
-              <option value="Yes — Family / Associate of PEP">Yes — Family / Associate of PEP</option>
-            </select>
-          </div>
-        </div>
-      `;
-      container.appendChild(uboCard);
-
-      uboCard.querySelectorAll('input, select').forEach(el => {
-        el.addEventListener('input', saveAllState);
-        el.addEventListener('change', saveAllState);
-      });
-      saveAllState();
-    }
-
-    function submitUbos() {
-      if (!validateCurrentStepRequiredFields(4)) return;
-      const sig = document.getElementById('sig-ubo');
-      sig.innerText = 'Pass (Verified)';
-      sig.className = 'telemetry-val pass';
-      saveAllState();
-      navigate(5);
-    }
-
-    function submitCdd() {
-      if (!validateCurrentStepRequiredFields(5)) return;
-      const pepVal = document.getElementById('selPep').value;
-      AppState.riskFactors.pep = pepVal.includes('Yes') ? 50 : 0;
-      saveAllState();
-      navigate(6);
-    }
-
-    /* AML SCREEN & CONTINUE BUTTON HANDLER */
-    function handleAmlButtonClick() {
-      if (!validateCurrentStepRequiredFields(7)) return;
-
-      if (AppState.amlCleared) {
-        validateAndExecuteRisk();
-        return;
-      }
-
-      runAmlEngine();
-    }
-
-    function runAmlEngine() {
-      const barContainer = document.getElementById('amlBarContainer');
-      const bar = document.getElementById('amlBar');
-      const box = document.getElementById('amlConsole');
-      const btn = document.getElementById('btnAml');
-
-      barContainer.style.display = 'block';
-      box.style.display = 'flex';
-      box.innerHTML = '';
-      bar.style.width = '0%';
-
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> SCREENING...`;
-
-      const dbs = [
-        `UN Sanctions Consolidated List`,
-        `MAS Financial Sanctions Designation`,
-        `Interpol Red Notice Database`,
-        `OFAC Specially Designated Nationals List`
-      ];
-
-      let idx = 0;
-      let pct = 0;
-
-      const interval = setInterval(() => {
-        if (idx < dbs.length) {
-          pct += 25;
-          bar.style.width = pct + '%';
-
-          const line = document.createElement('div');
-          line.className = 'console-line';
-          line.innerText = `[SCANNING] Querying ${dbs[idx]}... 0 Matches.`;
-          box.appendChild(line);
-          box.scrollTop = box.scrollHeight;
-          idx++;
-        } else {
-          clearInterval(interval);
-          AppState.amlCleared = true;
-
-          const sig = document.getElementById('sig-aml');
-          sig.innerText = 'Clear (0 Hits)';
-          sig.className = 'telemetry-val pass';
-
-          btn.disabled = false;
-          btn.innerText = 'CONTINUE';
-
-          saveAllState();
-          showToast('AML & Sanctions Screening Complete! Click CONTINUE to view results.');
-        }
-      }, 500);
-    }
-
-    function evaluateFinalDecision() {
-      // Calculate composite risk score
-      const totalRisk = AppState.riskFactors.industry + AppState.riskFactors.pep;
-      AppState.calculatedScore = totalRisk;
-
-      // Element References
-      const outBadge = document.getElementById('outBadge');
-      const outTitle = document.getElementById('outTitle');
-      const outSub = document.getElementById('outSub');
-      const outScore = document.getElementById('outScore');
-      const outBio = document.getElementById('outBio');
-      const outAcra = document.getElementById('outAcra');
-      const outResult = document.getElementById('outResult');
-      const outTime = document.getElementById('outTime');
-      const actionBtn = document.getElementById('btnFinalAction');
-
-      // Populate Metrics
-      outScore.innerText = `${AppState.calculatedScore} / 100`;
-      outBio.innerText = `${AppState.biometricScore || '98.8'}% Match`;
-      outAcra.innerText = AppState.acraVerified ? 'VERIFIED (LIVE)' : 'MANUAL REVIEW';
-      outAcra.style.color = AppState.acraVerified ? 'var(--emerald-light)' : 'var(--amber-light)';
-      outTime.innerText = new Date().toISOString();
-
-      // Dynamic Decision Logic & Action Button Formatting
-      if (AppState.calculatedScore > 50) {
-        // Escalated / Manual EDD Queue State
-        outBadge.innerText = '⚠️';
-        outBadge.className = 'outcome-badge review';
-        outTitle.innerText = 'Case Escalated to EDD Review Queue';
-        outTitle.style.color = 'var(--amber-light)';
-        outSub.innerText = 'Risk threshold exceeded (>50). Requires Enhanced Due Diligence by Risk Team.';
-        outResult.innerText = 'ESCALATED (EDD QUEUE)';
-        outResult.style.color = 'var(--amber-light)';
-
-        if (actionBtn) {
-          actionBtn.innerText = "Submit Case to EDD Queue";
-          actionBtn.className = "btn btn-warning"; // Amber / Warning styling
-        }
-      } else {
-        // Approved Straight-Through Processing State
-        outBadge.innerText = '✓';
-        outBadge.className = 'outcome-badge approved';
-        outTitle.innerText = 'Corporate Onboarding Approved';
-        outTitle.style.color = 'var(--emerald-light)';
-        outSub.innerText = 'All regulatory compliance checks passed. Low risk classification achieved.';
-        outResult.innerText = 'APPROVED (STP)';
-        outResult.style.color = 'var(--emerald-light)';
-
-        if (actionBtn) {
-          actionBtn.innerText = "Proceed to Dashboard";
-          actionBtn.className = "btn btn-primary"; // Standard Blue/Green styling
-        }
-      }
-
-      saveAllState();
-    }
-
-    function handleFinalAction() {
-      if (AppState.calculatedScore > 50) {
-        showToast('Case successfully submitted to EDD Review Queue.');
-      } else {
-        showToast('Redirecting to Corporate Dashboard...');
-      }
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   </script>
 </body>
