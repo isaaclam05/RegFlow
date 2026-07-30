@@ -1133,3 +1133,99 @@
     transition:transform .3s ease;
 
 }
+
+#chatToggle {
+    position: fixed;
+    right: 24px;
+    bottom: 90px; /* Changed from 24px to move it higher */
+    width: 72px;
+    height: 72px;
+    /* ... keep the rest of your properties unchanged ... */
+}
+
+#chatWindow {
+    position: fixed;
+    right: 24px;
+    top: 5vh; /* Changed from 15vh to move the chat popup higher */
+    width: 430px;
+    height: 70vh;
+    /* ... keep the rest of your properties unchanged ... */
+}
+
+/* ===========================================================
+   REALISTIC HUMAN TYPING INDICATOR
+=========================================================== */
+
+.typing-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 4px solid var(--chat-primary-light);
+    border-radius: 20px 20px 20px 8px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+    animation: bubbleIn 0.25s ease forwards;
+}
+
+.typing-label {
+    font-size: 13px;
+    color: var(--chat-text-secondary);
+    font-style: italic;
+    margin-right: 4px;
+}
+
+.typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--chat-primary-light);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    animation: humanBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0s;
+}
+
+@keyframes humanBounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1.15) translateY(-4px);
+        opacity: 1;
+    }
+}
+
+/* Smooth Caret Cursor for Live Typewriting */
+.typing-cursor::after {
+    content: "▋";
+    display: inline-block;
+    margin-left: 2px;
+    font-size: 13px;
+    color: var(--chat-primary-light);
+    animation: cursorBlink 0.7s infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
