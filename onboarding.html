@@ -7,9 +7,10 @@
   
   <!-- FAVICON & TAB LOGO -->
   <link rel="icon" type="image/png" href="logo-only.png" id="dynamic-favicon">
-
+  <link rel="stylesheet" href="chatbot.css"> 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   
   <style>
@@ -1988,6 +1989,82 @@
     </main>
   </div>
 
+  <!-- ================= CHATBOT ================= -->
+  <div id="chatbot">
+
+      <button id="chatToggle">
+          💬
+      </button>
+
+      <div id="chatWindow" class="hidden">
+
+          <div class="chat-header">
+              <div>
+                  <h3>RegFlow AI Assistant</h3>
+                  
+                  <p>Online</p>
+              </div>
+
+              <button id="chatClose" aria-label="Close">
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    stroke-linecap="round">
+
+                    <path d="M6 6L18 18"/>
+                    <path d="M18 6L6 18"/>
+
+                </svg>
+            </button>
+          </div>
+
+          <div id="chatMessages">
+
+              <div class="bot-message">
+                  <h4><b>👋 Welcome to RegFlow Assistant!</b></h4>
+                  
+                  <p>I'm here to help answer questions about the RegFlow onboarding process, identity verification, required documents, and compliance requirements.</p>
+                 
+                  <p>I don't collect or store any personal information during this chat. My role is to provide guidance and help you find the information you need quickly.</p>
+
+                  <p>How can I assist you today?</p>
+              </div>
+
+          </div>
+
+          <div class="chat-input">
+
+              <input
+                  type="text"
+                  id="chatInput"
+                  placeholder="Type your message..."
+              >
+
+              <button id="sendMessage" aria-label="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2L15 22L11 13L2 9L22 2"></path>
+                </svg>
+            </button>
+
+          </div>
+
+      </div>
+
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- FOOTER -->
@@ -3167,6 +3244,189 @@
       } else {
         showToast('Redirecting to Corporate Dashboard...');
       }
+    }
+
+    const toggle = document.getElementById("chatToggle");
+    const windowChat = document.getElementById("chatWindow");
+    const closeBtn = document.getElementById("chatClose");
+    const sendBtn = document.getElementById("sendMessage");
+    const input = document.getElementById("chatInput");
+    const messages = document.getElementById("chatMessages");
+
+    // ===============================
+    // OPEN / CLOSE CHAT
+    // ===============================
+
+    toggle.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+        windowChat.classList.toggle("hidden");
+
+    });
+
+    closeBtn.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+        windowChat.classList.add("hidden");
+
+    });
+
+    // ===============================
+    // CLOSE WHEN CLICKING OUTSIDE
+    // ===============================
+
+    document.addEventListener("click", function (e) {
+
+        const clickedInsideChat = windowChat.contains(e.target);
+        const clickedToggle = toggle.contains(e.target);
+
+        if (!clickedInsideChat && !clickedToggle) {
+            windowChat.classList.add("hidden");
+        }
+
+    });
+
+    // Prevent clicks inside the chatbot from closing it
+    windowChat.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+    });
+
+    // ===============================
+    // SEND MESSAGE
+    // ===============================
+
+    input.addEventListener("keypress", function (e) {
+
+        if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+        }
+
+    });
+
+    sendBtn.addEventListener("click", sendMessage);
+
+    // ===============================
+    // ADD USER MESSAGE
+    // ===============================
+
+    function addUserMessage(text) {
+
+        messages.innerHTML += `
+            <div class="user-message">
+                ${text}
+            </div>
+        `;
+
+        scrollBottom();
+
+    }
+
+    // ===============================
+    // ADD BOT MESSAGE
+    // ===============================
+
+    function addBotMessage(text) {
+
+        messages.innerHTML += `
+            <div class="bot-message">
+                ${text}
+            </div>
+        `;
+
+        scrollBottom();
+
+    }
+
+    // ===============================
+    // AUTO SCROLL
+    // ===============================
+
+    function scrollBottom() {
+
+        messages.scrollTop = messages.scrollHeight;
+
+    }
+
+    // ===============================
+    // SEND TO N8N
+    // ===============================
+
+    async function sendMessage() {
+
+        const message = input.value.trim();
+
+        if (message === "") return;
+
+        addUserMessage(message);
+
+        input.value = "";
+
+        const typing = document.createElement("div");
+
+        typing.className = "bot-message typing";
+
+        typing.id = "typing";
+
+        typing.innerHTML = "RegFlow Assistant is typing...";
+
+        messages.appendChild(typing);
+
+        scrollBottom();
+
+        try {
+
+            const response = await fetch(
+                "https://n8ngc.codeblazar.org/webhook/chatbot",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            const typingElement = document.getElementById("typing");
+
+            if (typingElement) {
+                typingElement.remove();
+            }
+
+            let reply =
+                data.reply ||
+                data.response ||
+                data.output ||
+                data.message ||
+                JSON.stringify(data);
+
+            addBotMessage(reply);
+
+        }
+        catch (err) {
+
+            const typingElement = document.getElementById("typing");
+
+            if (typingElement) {
+                typingElement.remove();
+            }
+
+            addBotMessage(
+                "Sorry, I'm currently unavailable. Please try again later."
+            );
+
+            console.error(err);
+
+        }
+
     }
   </script>
 </body>
