@@ -7,9 +7,10 @@
   
   <!-- FAVICON & TAB LOGO -->
   <link rel="icon" type="image/png" href="logo-only.png" id="dynamic-favicon">
-
+  <link rel="stylesheet" href="chatbot.css"> 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   
   <style>
@@ -454,6 +455,31 @@
     }
 
     .panel-subtitle { color: var(--text-muted); font-size: 0.875rem; line-height: 1.5; }
+
+    /* ACRA Search Input & Container Styles */
+    .acra-lookup-card {
+      background: var(--bg-slate-900);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .acra-lookup-row {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .acra-lookup-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .btn-acra-retrieve {
+      height: 46px;
+      white-space: nowrap;
+    }
 
     /* Form Components */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
@@ -1096,7 +1122,378 @@
       .btn-singpass-red { width: 100%; text-align: center; justify-content: center; }
       .outcome-button-group { flex-direction: column; }
     }
+
+    /* ==========================================
+      ACRA RESULT CARD THEME VARIABLES
+      ========================================== */
+    :root {
+      --acra-bg-card: #111827;
+      --acra-bg-header: rgba(15, 23, 42, 0.75);
+      --acra-bg-item: #0f172a;
+      --acra-bg-item-hover: #1e293b;
+      
+      --acra-border-subtle: rgba(255, 255, 255, 0.08);
+      --acra-border-accent: rgba(59, 130, 246, 0.25);
+      --acra-border-hover: #3b82f6;
+
+      --acra-text-main: #f8fafc;
+      --acra-text-muted: #94a3b8;
+
+      --acra-emerald: #34d399;
+      --acra-emerald-bg: rgba(16, 185, 129, 0.12);
+      --acra-emerald-border: rgba(52, 211, 153, 0.25);
+
+      --acra-radius-lg: 16px;
+      --acra-radius-md: 10px;
+      --acra-radius-pill: 9999px;
+      --acra-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ==========================================
+      CARD CONTAINER
+      ========================================== */
+    .acra-result-card {
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      background: var(--acra-bg-card);
+      border: 1px solid var(--acra-border-accent);
+      border-radius: var(--acra-radius-lg);
+      overflow: hidden;
+      box-shadow: var(--acra-shadow);
+      animation: acraFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ==========================================
+      HEADER SECTION
+      ========================================== */
+    .acra-result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--acra-bg-header);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--acra-border-subtle);
+      gap: 1rem;
+    }
+
+    .acra-result-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--acra-emerald);
+      background: var(--acra-emerald-bg);
+      border: 1px solid var(--acra-emerald-border);
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--acra-radius-pill);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .acra-result-badge .badge-icon {
+      flex-shrink: 0;
+    }
+
+    .acra-result-timestamp.mono {
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.75rem;
+      color: var(--acra-text-muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    /* ==========================================
+      PREVIEW GRID & ITEMS
+      ========================================== */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+
+    .preview-item {
+      background: var(--acra-bg-item);
+      border: 1px solid var(--acra-border-subtle);
+      border-radius: var(--acra-radius-md);
+      padding: 1rem 1.125rem;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .preview-item:hover {
+      background: var(--acra-bg-item-hover);
+      border-color: var(--acra-border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.12);
+    }
+
+    .preview-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* ==========================================
+      LABELS & VALUES
+      ========================================== */
+    .preview-label {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--acra-text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .preview-val-text {
+      display: block;
+      color: var(--acra-text-main);
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    /* Optional link styling inside value text */
+    .preview-val-text a {
+      color: var(--acra-border-hover);
+      text-decoration: none;
+    }
+
+    .preview-val-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* ==========================================
+      RESPONSIVE DESIGN
+      ========================================== */
+    @media (max-width: 768px) {
+      .acra-result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      .preview-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      .preview-item.full-width {
+        grid-column: auto;
+      }
+    }
+
+    /* ==========================================
+      ANIMATION
+      ========================================== */
+    @keyframes acraFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===========================================================
+      REGFLOW EXECUTIVE REVIEW
+    =========================================================== */
+
+    .preview-box{
+        background:#111827;
+        border:1px solid rgba(255,255,255,.06);
+        border-radius:18px;
+        padding:28px 32px;
+        box-shadow:0 18px 45px rgba(0,0,0,.28);
+    }
+
+    .preview-box>h3{
+        margin:0 0 22px;
+        padding-bottom:16px;
+        border-bottom:1px solid rgba(255,255,255,.08);
+        font-size:1.6rem;
+        font-weight:700;
+        color:#fff;
+    }
+
+    /* ===========================================================
+      SECTION
+    =========================================================== */
+
+    .preview-section{
+        margin-bottom:24px;
+    }
+
+    .preview-section:last-child{
+        margin-bottom:0;
+    }
+
+    .preview-section h4{
+        margin:0 0 12px;
+        color:#fff;
+        font-size:.92rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+    }
+
+    /* ===========================================================
+      GRID
+    =========================================================== */
+
+    .preview-grid{
+
+        display:grid;
+
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+        gap:14px;
+
+        align-items:stretch;
+    }
+
+    /* ===========================================================
+      CARD
+    =========================================================== */
+
+    .preview-item{
+
+        background:#0f172a;
+
+        border:1px solid rgba(255,255,255,.05);
+
+        border-radius:12px;
+
+        padding:16px 18px;
+
+        display:flex;
+
+        flex-direction:column;
+
+        justify-content:center;
+
+        min-height:92px;
+
+        transition:.25s;
+    }
+
+    .preview-item:hover{
+
+        border-color:rgba(59,130,246,.35);
+
+        background:#162135;
+    }
+
+    /* ===========================================================
+      LONG FIELDS
+    =========================================================== */
+
+    .preview-item.full-width{
+
+        grid-column:1/-1;
+
+        min-height:auto;
+    }
+
+    /* ===========================================================
+      LABEL
+    =========================================================== */
+
+    .preview-label{
+
+        color:#7f93ad;
+
+        font-size:.68rem;
+
+        text-transform:uppercase;
+
+        letter-spacing:.10em;
+
+        font-weight:600;
+
+        margin-bottom:8px;
+    }
+
+    /* ===========================================================
+      VALUE
+    =========================================================== */
+
+    .preview-val-text{
+
+        color:#f8fafc;
+
+        font-size:1rem;
+
+        font-weight:600;
+
+        line-height:1.5;
+
+        word-break:break-word;
+    }
+
+    /* ===========================================================
+      UBO GRID
+    =========================================================== */
+
+    #prev-ubo-list{
+
+        display:grid;
+
+        grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+        gap:14px;
+    }
+
+    #prev-ubo-list .preview-val-text{
+
+        background:#0f172a;
+
+        border:1px solid rgba(255,255,255,.05);
+
+        border-radius:12px;
+
+        padding:16px;
+    }
+
+    /* ===========================================================
+      RESPONSIVE
+    =========================================================== */
+
+    @media(max-width:1200px){
+
+        .preview-grid{
+
+            grid-template-columns:repeat(3,1fr);
+        }
+
+    }
+
+    @media(max-width:900px){
+
+        .preview-grid{
+
+            grid-template-columns:repeat(2,1fr);
+        }
+
+    }
+
+    @media(max-width:640px){
+
+        .preview-grid{
+
+            grid-template-columns:1fr;
+        }
+
+    }
   </style>
+  <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
 
@@ -1179,7 +1576,7 @@
           <span class="telemetry-val neutral" id="sig-acra">Pending</span>
         </div>
         <div class="telemetry-row">
-          <span class="telemetry-label">Biometric Verification</span>
+          <span class="telemetry-label">Biometric</span>
           <span class="telemetry-val neutral" id="sig-bio">Pending</span>
         </div>
         <div class="telemetry-row">
@@ -1187,7 +1584,7 @@
           <span class="telemetry-val neutral" id="sig-ubo">Pending</span>
         </div>
         <div class="telemetry-row">
-          <span class="telemetry-label">Documents Submitted</span>
+          <span class="telemetry-label">Documents</span>
           <span class="telemetry-val neutral" id="sig-docs">Pending</span>
         </div>
         <div class="telemetry-row">
@@ -1223,12 +1620,78 @@
       <div class="panel" id="panel-2">
         <div class="panel-header">
           <h2 class="panel-title">Corporate & Entity Profile (ACRA / Registry)</h2>
-          <p class="panel-subtitle">Entity identifiers and primary regulatory classification.</p>
+          <p class="panel-subtitle">Enter your Singapore UEN to auto-retrieve your entity profile directly from ACRA.</p>
         </div>
-        <div class="form-grid">
+
+        <div class="acra-lookup-card">
+          <div class="acra-lookup-row">
+            <div class="form-group">
+              <label for="inpUen">Singapore UEN / Entity ID *</label>
+              <input type="text" id="inpUen" placeholder="e.g., 202412345K" style="text-transform: uppercase;" required />
+            </div>
+            <button class="btn btn-primary btn-acra-retrieve" id="btnAcra" onclick="runAcraQuery()">
+              Retrieve from ACRA
+            </button>
+          </div>
+          <br>
+          <div class="panel-subtitle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>We'll securely pull the entity name, incorporation date, SSIC classification, paid-up capital, registered address and website directly from ACRA's registry.</span>
+          </div>
+        </div>
+
+        <div class="console-box" id="acraConsole" style="display:none;"></div>
+
+        <div class="acra-result-card" id="acraResultCard" style="display:none;">
+          <!-- Header Section -->
+          <div class="acra-result-header">
+            <div class="acra-result-badge">
+              <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Verified via ACRA Registry</span>
+            </div>
+            <span class="acra-result-timestamp mono" id="acraResultTimestamp">FETCHED: -- (GMT+8)</span>
+          </div>
+
+          <!-- Content Grid -->
+          <div class="preview-grid">
+            <div class="preview-item">
+              <span class="preview-label">Entity Legal Name</span>
+              <span class="preview-val-text" id="res-company">-</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Country / Jurisdiction</span>
+              <span class="preview-val-text" id="res-country">-</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Date of Incorporation</span>
+              <span class="preview-val-text" id="res-incdate">-</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Paid-Up Capital</span>
+              <span class="preview-val-text" id="res-capital">-</span>
+            </div>
+            <div class="preview-item full-width">
+              <span class="preview-label">SSIC Code & Description</span>
+              <span class="preview-val-text" id="res-ssic">-</span>
+            </div>
+            <div class="preview-item full-width">
+              <span class="preview-label">Company Website</span>
+              <span class="preview-val-text" id="res-website">-</span>
+            </div>
+            <div class="preview-item full-width">
+              <span class="preview-label">Registered Business Address</span>
+              <span class="preview-val-text" id="res-address">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legacy detailed fields retained (hidden) so saved state, previews, and later steps keep working unchanged -->
+        <div class="form-grid" style="display:none;" aria-hidden="true">
           <div class="form-group">
             <label for="selCountry">Country / Jurisdiction of Incorporation *</label>
-            <select id="selCountry" required>
+            <select id="selCountry">
               <option value="" disabled selected>Select Country or jurisdiction...</option>
               <optgroup label="Primary Asian & APAC Financial Hubs">
                 <option value="Singapore">Singapore</option>
@@ -1454,10 +1917,6 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="inpUen">Singapore UEN / Entity ID *</label>
-            <input type="text" id="inpUen" placeholder="e.g., 202412345K" style="text-transform: uppercase;" required />
-          </div>
-          <div class="form-group">
             <label for="inpCompany">Entity Legal Name *</label>
             <input type="text" id="inpCompany" placeholder="e.g., Company Pte. Ltd." required />
           </div>
@@ -1592,11 +2051,9 @@
           </div>
         </div>
 
-        <div class="console-box" id="acraConsole" style="display:none;"></div>
-
         <div class="action-row">
           <button class="btn btn-secondary" onclick="navigate(1)">← Back</button>
-          <button class="btn btn-primary" id="btnAcra" onclick="runAcraQuery()">SCAN</button>
+          <button class="btn btn-primary" onclick="submitCorporateDetails()">Proceed to Directors & eKYC →</button>
         </div>
       </div>
 
@@ -1606,13 +2063,17 @@
         <div class="singpass-box-container" id="singpassBoxContainer">
           <div>
             <div class="singpass-box-title">Singpass Myinfo Corporate Verification</div>
-            <div class="singpass-box-desc">Autofill director credentials and liveness metrics via official Singpass Myinfo integration.</div>
+            <div class="singpass-box-desc" id="singpassBoxDesc">
+              Autofill director credentials and liveness metrics via official Singpass Myinfo integration.
+            </div>
           </div>
-          <button type="button" class="btn-singpass-red" id="btnSingpassTrigger" onclick="startSingpassFlow()">Retrieve MyInfo via Singpass</button>
+          <button type="button" class="btn-singpass-red" id="btnSingpassTrigger" onclick="startSingpassFlow()">
+            Retrieve MyInfo via Singpass
+          </button>
         </div>
 
-        <!-- Biometric Viewport -->
-        <div class="biometric-wrapper" id="bioWrapper">
+        <!-- Biometric Viewport (Hidden initially) -->
+        <div class="biometric-wrapper" id="bioWrapper" style="display: none;">
           <div style="font-size: 0.75rem; font-weight: 700; color: var(--blue-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
             Singpass Biometric Liveness Check
           </div>
@@ -1624,41 +2085,60 @@
           <div class="prompt-sub" id="bioSubPrompt">Please face the camera directly.</div>
         </div>
 
-        <!-- Form Fields Starts Empty with Placeholders -->
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="inpName">Primary Director Full Name *</label>
-            <input type="text" id="inpName" placeholder="Primary Director Full Name" required />
-          </div>
-          <div class="form-group">
-            <label for="inpId">NRIC / Passport Number *</label>
-            <input type="text" id="inpId" placeholder="NRIC / Passport Number" style="text-transform: uppercase;" required />
-          </div>
-          <div class="form-group">
-            <label for="selNationality">Nationality *</label>
-            <select id="selNationality" required>
-              <option value="" disabled selected>Select nationality</option>
-              <option value="Singaporean">Singaporean</option>
-              <option value="Singapore PR">Singapore PR</option>
-              <option value="Malaysian">Malaysian</option>
-              <option value="Chinese">Chinese</option>
-              <option value="American">American</option>
-              <option value="British">British</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="selPep">Politically Exposed Person (PEP) Status *</label>
-            <select id="selPep" required>
-              <option value="" disabled selected>Select PEP status...</option>
-              <option value="No — Not a PEP or close associate">No — Not a PEP or close associate</option>
-              <option value="Yes — Domestic PEP">Yes — Domestic PEP (Current/Former High Official)</option>
-              <option value="Yes — Foreign PEP">Yes — Foreign PEP (Current/Former High Official)</option>
-              <option value="Yes — International Organisation PEP">Yes — International Organisation PEP</option>
-            </select>
-          </div>
-          <div class="form-group full">
-            <label for="inpResAddress">Director Residential Address *</label>
-            <input type="text" id="inpResAddress" placeholder="Director Residential Address" required />
+        <!-- Director Fields Container (Hidden until facial verification succeeds) -->
+        <div id="directorFieldsContainer" style="display: none;">
+          <div class="form-grid">
+
+            <!-- Full Name -->
+            <div class="form-group locked">
+              <label for="inpName">
+                Primary Director Full Name
+                <span class="retrieved-tag">MyInfo</span>
+              </label>
+              <input type="text" id="inpName" readonly disabled required>
+            </div>
+
+            <!-- NRIC -->
+            <div class="form-group locked">
+              <label for="inpId">
+                NRIC / Passport Number
+                <span class="retrieved-tag">MyInfo</span>
+              </label>
+              <input type="text" id="inpId" style="text-transform:uppercase;" readonly disabled required>
+            </div>
+
+            <!-- Nationality -->
+            <div class="form-group locked">
+              <label for="selNationality">
+                Nationality
+                <span class="retrieved-tag">MyInfo</span>
+              </label>
+              <input type="text" id="selNationality" readonly disabled required>
+            </div>
+
+            <!-- PEP Status -->
+            <div class="form-group">
+              <label for="selPep">
+                Politically Exposed Person (PEP) Status *
+              </label>
+              <select id="selPep" required>
+                <option value="" selected disabled>Select PEP status...</option>
+                <option value="No — Not a PEP or close associate">No — Not a PEP or close associate</option>
+                <option value="Yes — Domestic PEP">Yes — Domestic PEP</option>
+                <option value="Yes — Foreign PEP">Yes — Foreign PEP</option>
+                <option value="Yes — International Organisation PEP">Yes — International Organisation PEP</option>
+              </select>
+            </div>
+
+            <!-- Residential Address -->
+            <div class="form-group full locked">
+              <label for="inpResAddress">
+                Director Residential Address
+                <span class="retrieved-tag">MyInfo</span>
+              </label>
+              <input type="text" id="inpResAddress" readonly disabled required>
+            </div>
+
           </div>
         </div>
 
@@ -1977,15 +2457,91 @@
           </div>
 
           <div class="outcome-button-group">
+              <button class="btn btn-secondary" onclick="resetEngine()">↺ Reset</button>
               <button class="btn btn-primary" id="btnFinalAction" onclick="window.location.href='dashboard.html'">
                   Proceed to Dashboard
               </button>
-              <button class="btn btn-secondary" onclick="resetEngine()">↺ Reset</button>
           </div>
         </div>
       </div>
 
     </main>
+  </div>
+
+  <!-- ================= CHATBOT ================= -->
+  <div id="chatbot">
+
+      <button id="chatToggle">
+          💬
+      </button>
+
+      <div id="chatWindow" class="hidden">
+
+          <div class="chat-header">
+              <div>
+                  <h3>RegFlow AI Assistant</h3>
+                  
+                  <p>Online</p>
+              </div>
+
+              <button id="chatClose" aria-label="Close">
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    stroke-linecap="round">
+
+                    <path d="M6 6L18 18"/>
+                    <path d="M18 6L6 18"/>
+
+                </svg>
+            </button>
+          </div>
+
+          <div id="chatMessages">
+
+              <div class="bot-message">
+                  <h4><b>👋 Welcome to RegFlow Assistant!</b></h4>
+                  
+                  <p>I'm here to help answer questions about the RegFlow onboarding process, identity verification, required documents, and compliance requirements.</p>
+                 
+                  <p>I don't collect or store any personal information during this chat. My role is to provide guidance and help you find the information you need quickly.</p>
+
+                  <p>How can I assist you today?</p>
+              </div>
+
+          </div>
+
+          <div class="chat-input">
+
+              <input
+                  type="text"
+                  id="chatInput"
+                  placeholder="Type your message..."
+              >
+
+              <button id="sendMessage" aria-label="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2L15 22L11 13L2 9L22 2"></path>
+                </svg>
+            </button>
+
+          </div>
+
+      </div>
+
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
@@ -2003,6 +2559,7 @@
       facePassed: false,
       singpassRetrieved: false,
       acraVerified: false,
+      acraTimestamp: null,
       bizProfileMode: 'acra',
       bizProfileFetched: false,
       documentsUploaded: { doc1: false, doc2: false, doc3: false },
@@ -2020,6 +2577,20 @@
       'selFatca', 'inpTin'
     ];
 
+    /* HELPER: FORMAT DATE TO SINGAPORE TIME (SGT / GMT+8) */
+    function formatSGT(dateInput = new Date()) {
+      return new Date(dateInput).toLocaleString('en-SG', {
+        timeZone: 'Asia/Singapore',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    }
+
     /* INITIALIZE APP ON LOAD */
     window.addEventListener('DOMContentLoaded', () => {
       initLocalStorageListeners();
@@ -2028,979 +2599,424 @@
 
     /* CLEAR EVERYTHING FUNCTION */
     function clearEverything() {
-      // 1. Clear LocalStorage
       localStorage.clear();
-
-      // 2. Reset AppState
-      AppState.currentStep = 1;
-      AppState.consent = false;
-      AppState.biometricScore = 0;
-      AppState.facePassed = false;
-      AppState.singpassRetrieved = false;
-      AppState.acraVerified = false;
-      AppState.bizProfileMode = 'acra';
-      AppState.bizProfileFetched = false;
-      AppState.documentsUploaded = { doc1: false, doc2: false, doc3: false };
-      AppState.documentBlobs = { doc1: null, doc2: null, doc3: null };
-      AppState.documentNames = { doc1: '', doc2: '', doc3: '' };
-      AppState.riskFactors = { industry: 10, pep: 0 };
-      AppState.amlCleared = false;
-      AppState.calculatedScore = 0;
-
-      // 3. Clear all input fields, checkboxes & drop-downs
-      inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (el.tagName === 'SELECT') {
-            el.selectedIndex = 0;
-          } else {
-            el.value = '';
-          }
-          el.readOnly = false;
-          el.disabled = false;
-          el.classList.remove('input-error');
-        }
-      });
-
-      const chk = document.getElementById('chkConsent');
-      if (chk) chk.checked = false;
-
-      // 4. Reset Telemetry Panel Badges
-      const sigConsent = document.getElementById('sig-consent');
-      if (sigConsent) { sigConsent.innerText = 'Awaiting'; sigConsent.className = 'telemetry-val pending'; }
-
-      const sigAcra = document.getElementById('sig-acra');
-      if (sigAcra) { sigAcra.innerText = 'Pending'; sigAcra.className = 'telemetry-val neutral'; }
-
-      const sigBio = document.getElementById('sig-bio');
-      if (sigBio) { sigBio.innerText = 'Pending'; sigBio.className = 'telemetry-val neutral'; }
-
-      const sigUbo = document.getElementById('sig-ubo');
-      if (sigUbo) { sigUbo.innerText = 'Pending'; sigUbo.className = 'telemetry-val neutral'; }
-
-      const sigDocs = document.getElementById('sig-docs');
-      if (sigDocs) { sigDocs.innerText = 'Pending'; sigDocs.className = 'telemetry-val neutral'; }
-
-      const sigAml = document.getElementById('sig-aml');
-      if (sigAml) { sigAml.innerText = 'Pending'; sigAml.className = 'telemetry-val neutral'; }
-
-      // 5. Reset Singpass Trigger Button & Biometrics
-      const btnSingpass = document.getElementById('btnSingpassTrigger');
-      if (btnSingpass) {
-        btnSingpass.innerText = 'Retrieve MyInfo via Singpass';
-        btnSingpass.disabled = false;
-        btnSingpass.style.backgroundColor = 'var(--rose-primary)';
-      }
-      const bioWrapper = document.getElementById('bioWrapper');
-      if (bioWrapper) bioWrapper.style.display = 'none';
-
-      // 6. Reset ACRA query buttons/consoles
-      const btnAcra = document.getElementById('btnAcra');
-      if (btnAcra) {
-        btnAcra.disabled = false;
-        btnAcra.innerHTML = 'SCAN';
-      }
-      const acraConsole = document.getElementById('acraConsole');
-      if (acraConsole) {
-        acraConsole.innerHTML = '';
-        acraConsole.style.display = 'none';
-      }
-
-      // 7. Reset UBO Matrix Repeater
-      const container = document.getElementById('ubo-container');
-      if (container) {
-        container.innerHTML = `
-          <div class="repeater-box ubo-item">
-            <div class="repeater-header">
-              <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #1</span>
-            </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>UBO Full Name *</label>
-                <input type="text" class="ubo-name" placeholder="Enter UBO's full legal name" required />
-              </div>
-              <div class="form-group">
-                <label>Ownership / Voting Rights % *</label>
-                <input type="number" class="ubo-shares" placeholder="Enter percentage" min="1" max="100" required />
-              </div>
-              <div class="form-group">
-                <label>Tax Residence Jurisdiction *</label>
-                <input type="text" class="ubo-tax-res" placeholder="Enter tax residence" required />
-              </div>
-              <div class="form-group">
-                <label>PEP Status *</label>
-                <select class="ubo-pep" required>
-                  <option value="No — Not a PEP">No — Not a PEP</option>
-                  <option value="Yes — Domestic PEP">Yes — Domestic PEP</option>
-                  <option value="Yes — Foreign PEP">Yes — Foreign PEP</option>
-                  <option value="Yes — International Org PEP">Yes — International Org PEP</option>
-                  <option value="Yes — Family / Associate of PEP">Yes — Family / Associate of PEP</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        `;
-        uboCounter = 1;
-      }
-
-      // 8. Reset Verification Wizard Inputs & Dropzones
-      setBizProfileMode('acra');
-      const btnFetchAcra = document.getElementById('btn-fetch-acra');
-      if (btnFetchAcra) {
-        btnFetchAcra.disabled = false;
-        btnFetchAcra.innerHTML = '⚡ Fetch Official ACRA BizFile Record';
-        btnFetchAcra.style.borderColor = 'var(--blue-primary)';
-        btnFetchAcra.style.color = 'var(--blue-light)';
-      }
-
-      ['1', '2', '3'].forEach(num => {
-        const badge = document.getElementById(`badge-wiz${num}`);
-        if (badge) {
-          badge.innerText = 'Action Required';
-          badge.className = 'doc-wizard-badge badge-pending';
-        }
-        const card = document.getElementById(`card-wiz${num}`);
-        if (card) card.classList.remove('invalid-card');
-
-        const fileInput = document.getElementById(`file-doc${num}`);
-        if (fileInput) fileInput.value = '';
-
-        const dropzone = document.getElementById(`dropzone-doc${num}`);
-        if (dropzone) dropzone.classList.remove('has-file');
-
-        const droptext = document.getElementById(`text-doc${num}`);
-        if (droptext) {
-          if (num === '1') droptext.innerText = 'Click or drag & drop ACRA BizFile (PDF)';
-          if (num === '2') droptext.innerText = 'Upload Signed Board Resolution (PDF) *';
-          if (num === '3') droptext.innerText = 'Click or drag & drop Commercial Proof (PDF/ZIP) *';
-        }
-      });
-
-      // 9. Reset AML Progress & Consoles
-      const amlBarContainer = document.getElementById('amlBarContainer');
-      if (amlBarContainer) amlBarContainer.style.display = 'none';
-
-      const amlBar = document.getElementById('amlBar');
-      if (amlBar) amlBar.style.width = '0%';
-
-      const amlConsole = document.getElementById('amlConsole');
-      if (amlConsole) {
-        amlConsole.innerHTML = '';
-        amlConsole.style.display = 'none';
-      }
-
-      const btnAml = document.getElementById('btnAml');
-      if (btnAml) {
-        btnAml.disabled = false;
-        btnAml.innerText = 'SCREEN';
-      }
-
-      // 10. Return to Step 1
-      navigate(1);
-      showToast('All data cleared. System reset to initial entry state.');
+      sessionStorage.clear();
+      showToast('All onboarding data & saved state cleared.', 'info');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
 
-    function resetEngine() {
-      clearEverything();
-    }
-
-    /* FULL STATE PERSISTENCE ENGINE */
-    function saveAllState() {
-      // 1. Consent checkbox
-      const chk = document.getElementById('chkConsent');
-      if (chk) localStorage.setItem('regflow_chkConsent', chk.checked);
-
-      // 2. All standard form inputs
-      inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) localStorage.setItem(`regflow_${id}`, el.value);
-      });
-
-      // 3. Application State Object
-      localStorage.setItem('regflow_appState', JSON.stringify({
-        consent: AppState.consent,
-        biometricScore: AppState.biometricScore,
-        facePassed: AppState.facePassed,
-        singpassRetrieved: AppState.singpassRetrieved,
-        acraVerified: AppState.acraVerified,
-        bizProfileMode: AppState.bizProfileMode,
-        bizProfileFetched: AppState.bizProfileFetched,
-        documentsUploaded: AppState.documentsUploaded,
-        documentNames: AppState.documentNames,
-        amlCleared: AppState.amlCleared,
-        calculatedScore: AppState.calculatedScore
-      }));
-
-      // 4. Save UBO matrix rows
-      saveUboState();
-    }
-
-    function loadFromLocalStorage() {
-      // 1. Load Consent Checkbox
-      const chk = document.getElementById('chkConsent');
-      if (chk && localStorage.getItem('regflow_chkConsent') === 'true') {
-        chk.checked = true;
-        AppState.consent = true;
-        const sig = document.getElementById('sig-consent');
-        if (sig) {
-          sig.innerText = 'Captured';
-          sig.className = 'telemetry-val pass';
-        }
-      }
-
-      // 2. Load Input values
-      inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          const storedVal = localStorage.getItem(`regflow_${id}`);
-          if (storedVal !== null) {
-            el.value = storedVal;
-          }
-        }
-      });
-
-      // 3. Load AppState flags
-      const savedAppState = localStorage.getItem('regflow_appState');
-      if (savedAppState) {
-        try {
-          const parsed = JSON.parse(savedAppState);
-          Object.assign(AppState, parsed);
-        } catch(e) {
-          console.error('Error parsing AppState:', e);
-        }
-      }
-
-      // 4. Restore Singpass MyInfo status
-      if (localStorage.getItem('regflow_singpass_done') === 'true' || AppState.singpassRetrieved) {
-        const name = localStorage.getItem('regflow_inpName');
-        const id = localStorage.getItem('regflow_inpId');
-        const nat = localStorage.getItem('regflow_selNationality');
-        const addr = localStorage.getItem('regflow_inpResAddress');
-        if (name && id && nat && addr) {
-          autofillDirectorData(name, id, nat, addr, false);
-        }
-      }
-
-      // 5. Restore ACRA Status
-      if (AppState.acraVerified) {
-        const sig = document.getElementById('sig-acra');
-        if (sig) {
-          sig.innerText = 'Verified';
-          sig.className = 'telemetry-val pass';
-        }
-        const btnAcra = document.getElementById('btnAcra');
-        if (btnAcra) btnAcra.innerHTML = 'CONTINUE';
-      }
-
-      // 6. Restore Documents
-      restoreDocuments();
-
-      // 7. Restore UBO repeater matrix
-      restoreUboState();
-
-      // 8. Restore AML Screening
-      if (AppState.amlCleared) {
-        const sig = document.getElementById('sig-aml');
-        if (sig) {
-          sig.innerText = 'Clear (0 Hits)';
-          sig.className = 'telemetry-val pass';
-        }
-        const btnAml = document.getElementById('btnAml');
-        if (btnAml) {
-          btnAml.innerText = 'CONTINUE';
-          btnAml.disabled = false;
-        }
-        const amlBarContainer = document.getElementById('amlBarContainer');
-        if (amlBarContainer) amlBarContainer.style.display = 'block';
-
-        const amlBar = document.getElementById('amlBar');
-        if (amlBar) amlBar.style.width = '100%';
-
-        const amlConsole = document.getElementById('amlConsole');
-        if (amlConsole) {
-          amlConsole.style.display = 'flex';
-          amlConsole.innerHTML = `
-            <div class="console-line">[SCANNING] Querying UN Sanctions Consolidated List... 0 Matches.</div>
-            <div class="console-line">[SCANNING] Querying MAS Financial Sanctions Designation... 0 Matches.</div>
-            <div class="console-line">[SCANNING] Querying Interpol Red Notice Database... 0 Matches.</div>
-            <div class="console-line">[SCANNING] Querying OFAC Specially Designated Nationals List... 0 Matches.</div>
-            <div class="console-line" style="color: var(--emerald-light); font-weight: 700;">[STATUS] All screenings cleared. System ready to proceed.</div>
-          `;
-        }
-      }
-    }
-
+    /* LOCAL STORAGE STATE MANAGEMENT */
     function initLocalStorageListeners() {
-      // Single event listener for standard inputs
       inputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.addEventListener('input', () => { el.classList.remove('input-error'); saveAllState(); });
-          el.addEventListener('change', () => { el.classList.remove('input-error'); saveAllState(); });
+          el.addEventListener('input', () => saveToLocalStorage());
+          el.addEventListener('change', () => saveToLocalStorage());
         }
       });
 
       const chk = document.getElementById('chkConsent');
       if (chk) {
-        chk.addEventListener('change', () => { saveAllState(); });
+        chk.addEventListener('change', () => {
+          AppState.consent = chk.checked;
+          saveToLocalStorage();
+        });
       }
     }
 
-    /* STRICT STEP VALIDATION ENGINE */
-    function validateCurrentStepRequiredFields(step) {
-      let isValid = true;
-      const currentPanel = document.getElementById(`panel-${step}`);
-      if (!currentPanel) return true;
+    function saveToLocalStorage() {
+      const data = {
+        AppState: { ...AppState, documentBlobs: {} }, // Exclude raw file blobs from storage
+        inputs: {}
+      };
 
-      if (step === 1) {
-        const chk = document.getElementById('chkConsent');
-        if (!chk.checked) {
-          showToast('You must accept regulatory terms to proceed.', true);
-          return false;
-        }
-        return true;
-      }
-
-      if (step === 3) {
-        if (!AppState.singpassRetrieved || !AppState.facePassed) {
-          showToast('Please retrieve your data via Singpass before proceeding.', true);
-          return false;
-        }
-        const pepSelect = document.getElementById('selPep');
-        if (!pepSelect.value) {
-          pepSelect.classList.add('input-error');
-          showToast('You MUST select your Politically Exposed Person (PEP) status.', true);
-          return false;
-        } else {
-          pepSelect.classList.remove('input-error');
-        }
-        return true;
-      }
-
-      const requiredInputs = currentPanel.querySelectorAll('input[required], select[required]');
-      for (let input of requiredInputs) {
-        if (!input.value || input.value.trim() === '') {
-          input.classList.add('input-error');
-          isValid = false;
-        } else {
-          input.classList.remove('input-error');
-        }
-      }
-
-      if (step === 6) {
-        if (AppState.bizProfileMode === 'acra') {
-          if (!AppState.bizProfileFetched) {
-            document.getElementById('card-wiz1').classList.add('invalid-card');
-            isValid = false;
-          } else {
-            document.getElementById('card-wiz1').classList.remove('invalid-card');
-          }
-        } else {
-          if (!AppState.documentsUploaded.doc1) {
-            document.getElementById('card-wiz1').classList.add('invalid-card');
-            isValid = false;
-          } else {
-            document.getElementById('card-wiz1').classList.remove('invalid-card');
-          }
-        }
-
-        if (!AppState.documentsUploaded.doc2) {
-          document.getElementById('card-wiz2').classList.add('invalid-card');
-          isValid = false;
-        } else {
-          document.getElementById('card-wiz2').classList.remove('invalid-card');
-        }
-
-        if (!AppState.documentsUploaded.doc3) {
-          document.getElementById('card-wiz3').classList.add('invalid-card');
-          isValid = false;
-        } else {
-          document.getElementById('card-wiz3').classList.remove('invalid-card');
-        }
-      }
-
-      if (!isValid) {
-        showToast('Please complete all required fields and documents marked with *.', true);
-      }
-
-      return isValid;
-    }
-
-    /* VERIFICATION WIZARD FUNCTIONS */
-    function setBizProfileMode(mode) {
-      AppState.bizProfileMode = mode;
-      const btnAcra = document.getElementById('btn-toggle-acra');
-      const btnUpload = document.getElementById('btn-toggle-upload');
-      const acraBox = document.getElementById('mode-acra-container');
-      const uploadBox = document.getElementById('mode-upload-container');
-
-      if (mode === 'acra') {
-        btnAcra.classList.add('active');
-        btnUpload.classList.remove('active');
-        acraBox.style.display = 'block';
-        uploadBox.style.display = 'none';
-      } else {
-        btnUpload.classList.add('active');
-        btnAcra.classList.remove('active');
-        uploadBox.style.display = 'block';
-        acraBox.style.display = 'none';
-      }
-      saveAllState();
-    }
-
-    function executeAcraFetchWizard() {
-      const uen = localStorage.getItem('regflow_inpUen') || '202412345K';
-      const btn = document.getElementById('btn-fetch-acra');
-      
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> Querying ACRA Live Registry...`;
-
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.innerHTML = `✓ ACRA BizFile Fetched (${uen})`;
-        btn.style.borderColor = 'var(--emerald-primary)';
-        btn.style.color = 'var(--emerald-light)';
-
-        const badge = document.getElementById('badge-wiz1');
-        badge.innerText = 'Verified via ACRA API';
-        badge.className = 'doc-wizard-badge badge-verified';
-
-        AppState.bizProfileFetched = true;
-        
-        const pdfData = `data:application/pdf;base64,JVBERi0xLjQKJSVDT01QTElBTkNFIEJFWkZJTEUgRVhUUkFDVAo=`;
-        AppState.documentBlobs.doc1 = pdfData;
-        AppState.documentNames.doc1 = `ACRA_BizFile_${uen}.pdf`;
-        localStorage.setItem('regflow_doc_data_doc1', pdfData);
-
-        saveAllState();
-        showToast('Business Profile successfully fetched from ACRA!');
-      }, 1500);
-    }
-
-    function handleFileSelected(docId, labelName) {
-      const fileInput = document.getElementById(`file-${docId}`);
-      const dropzone = document.getElementById(`dropzone-${docId}`);
-      const droptext = document.getElementById(`text-${docId}`);
-
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const base64Data = e.target.result;
-          try {
-            localStorage.setItem(`regflow_doc_data_${docId}`, base64Data);
-          } catch(err) {
-            console.warn('LocalStorage size threshold reached for binary data.');
-          }
-          dropzone.classList.add('has-file');
-          droptext.innerText = `✓ Attached: ${file.name}`;
-          
-          AppState.documentsUploaded[docId] = true;
-          AppState.documentBlobs[docId] = base64Data;
-          AppState.documentNames[docId] = file.name;
-
-          const wizardIndex = docId.replace('doc', '');
-          const badge = document.getElementById(`badge-wiz${wizardIndex}`);
-          if (badge) {
-            badge.innerText = 'File Attached';
-            badge.className = 'doc-wizard-badge badge-verified';
-          }
-          saveAllState();
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function restoreDocuments() {
-      if (AppState.bizProfileMode) {
-        setBizProfileMode(AppState.bizProfileMode);
-      }
-      if (AppState.bizProfileFetched) {
-        const btn = document.getElementById('btn-fetch-acra');
-        if (btn) {
-          const uen = localStorage.getItem('regflow_inpUen') || '202412345K';
-          btn.innerHTML = `✓ ACRA BizFile Fetched (${uen})`;
-          btn.style.borderColor = 'var(--emerald-primary)';
-          btn.style.color = 'var(--emerald-light)';
-        }
-        const badge = document.getElementById('badge-wiz1');
-        if (badge) {
-          badge.innerText = 'Verified via ACRA API';
-          badge.className = 'doc-wizard-badge badge-verified';
-        }
-      }
-
-      ['doc1', 'doc2', 'doc3'].forEach(docId => {
-        const name = AppState.documentNames[docId];
-        const data = localStorage.getItem(`regflow_doc_data_${docId}`);
-        if (name) {
-          AppState.documentsUploaded[docId] = true;
-          AppState.documentBlobs[docId] = data || URL.createObjectURL(new Blob([`Document Content for ${name}`], { type: 'application/pdf' }));
-
-          const dropzone = document.getElementById(`dropzone-${docId}`);
-          const droptext = document.getElementById(`text-${docId}`);
-          if (dropzone && droptext) {
-            dropzone.classList.add('has-file');
-            droptext.innerText = `✓ Attached: ${name}`;
-          }
-          const wizardIndex = docId.replace('doc', '');
-          const badge = document.getElementById(`badge-wiz${wizardIndex}`);
-          if (badge) {
-            badge.innerText = 'File Attached';
-            badge.className = 'doc-wizard-badge badge-verified';
-          }
-        }
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data.inputs[id] = el.value;
       });
 
-      if (AppState.documentsUploaded.doc1 && AppState.documentsUploaded.doc2 && AppState.documentsUploaded.doc3) {
-        const sig = document.getElementById('sig-docs');
-        if (sig) {
-          sig.innerText = 'Verified Wizard';
-          sig.className = 'telemetry-val pass';
+      const uboData = [];
+      document.querySelectorAll('.ubo-item').forEach(item => {
+        uboData.push({
+          name: item.querySelector('.ubo-name')?.value || '',
+          shares: item.querySelector('.ubo-shares')?.value || '',
+          taxRes: item.querySelector('.ubo-tax-res')?.value || '',
+          pep: item.querySelector('.ubo-pep')?.value || ''
+        });
+      });
+      data.ubos = uboData;
+
+      localStorage.setItem('regflow_state', JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+      const raw = localStorage.getItem('regflow_state');
+      if (!raw) return;
+
+      try {
+        const data = JSON.parse(raw);
+        if (data.AppState) {
+          Object.assign(AppState, data.AppState);
         }
-      }
-    }
 
-    function submitVerificationWizard() {
-      if (!validateCurrentStepRequiredFields(6)) return;
+        if (data.inputs) {
+          Object.keys(data.inputs).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = data.inputs[id];
+          });
+        }
 
-      const sig = document.getElementById('sig-docs');
-      sig.innerText = 'Verified Wizard';
-      sig.className = 'telemetry-val pass';
-
-      saveAllState();
-      showToast('Verification Wizard checks completed!');
-      navigate(7);
-    }
-
-    function validateAndExecuteRisk() {
-      if (!validateCurrentStepRequiredFields(7)) return;
-      saveAllState();
-      navigate(8);
-      evaluateFinalDecision();
-    }
-
-    /* COMPREHENSIVE PREVIEW ENGINE WITH DOWNLOAD LINKS AND DROPDOWNS */
-    function populatePreview() {
-      // 1. Corporate Profile
-      document.getElementById('prev-country').innerText = localStorage.getItem('regflow_selCountry') || 'Not Selected';
-      document.getElementById('prev-uen').innerText = localStorage.getItem('regflow_inpUen') || 'Not Provided';
-      document.getElementById('prev-company').innerText = localStorage.getItem('regflow_inpCompany') || 'Not Provided';
-      document.getElementById('prev-incdate').innerText = localStorage.getItem('regflow_incDate') || 'Not Provided';
-      document.getElementById('prev-ssic').innerText = localStorage.getItem('regflow_selSsic') || 'Not Selected';
-      document.getElementById('prev-capital').innerText = localStorage.getItem('regflow_inpCapital') ? `$${Number(localStorage.getItem('regflow_inpCapital')).toLocaleString()} SGD` : 'Not Provided';
-      document.getElementById('prev-website').innerText = localStorage.getItem('regflow_inpWebsite') || 'Not Provided';
-      document.getElementById('prev-address').innerText = localStorage.getItem('regflow_inpAddress') || 'Not Provided';
-
-      // 2. Primary Director Details
-      document.getElementById('prev-dir-name').innerText = localStorage.getItem('regflow_inpName') || 'Not Provided';
-      document.getElementById('prev-dir-id').innerText = localStorage.getItem('regflow_inpId') || 'Not Provided';
-      document.getElementById('prev-dir-nationality').innerText = localStorage.getItem('regflow_selNationality') || 'Not Selected';
-      document.getElementById('prev-dir-pep').innerText = localStorage.getItem('regflow_selPep') || 'Not Selected';
-      document.getElementById('prev-dir-address').innerText = localStorage.getItem('regflow_inpResAddress') || 'Not Provided';
-
-      // 3. UBO Matrix Dynamic Render
-      const uboContainer = document.getElementById('prev-ubo-list');
-      const savedUbos = localStorage.getItem('regflow_ubos');
-      if (savedUbos) {
-        try {
-          const ubos = JSON.parse(savedUbos);
-          if (Array.isArray(ubos) && ubos.length > 0) {
-            uboContainer.innerHTML = ubos.map((u, i) => `
-              <div class="ubo-preview-card">
-                <div style="font-weight:700; color:var(--blue-light); font-size:0.8rem; margin-bottom:0.25rem;">UBO #${i+1}: ${u.name || 'N/A'}</div>
-                <div class="preview-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                  <div><span class="preview-label">Equity Ownership:</span> <span class="preview-val-text">${u.shares ? u.shares + '%' : 'N/A'}</span></div>
-                  <div><span class="preview-label">Tax Residence:</span> <span class="preview-val-text">${u.taxRes || 'N/A'}</span></div>
-                  <div><span class="preview-label">PEP Status:</span> <span class="preview-val-text">${u.pep || 'N/A'}</span></div>
-                </div>
-              </div>
-            `).join('');
-          } else {
-            uboContainer.innerHTML = `<div class="preview-val-text" style="color: var(--text-muted); font-size: 0.8rem;">No UBOs declared.</div>`;
+        if (data.ubos && data.ubos.length > 0) {
+          const container = document.getElementById('ubo-container');
+          if (container) {
+            container.innerHTML = '';
+            data.ubos.forEach((u, idx) => {
+              addUboFieldWithData(idx + 1, u);
+            });
           }
-        } catch(e) {
-          uboContainer.innerHTML = `<div class="preview-val-text" style="color: var(--text-muted); font-size: 0.8rem;">Error loading UBO matrix.</div>`;
         }
-      }
 
-      // 4. Documents & Files
-      const doc1El = document.getElementById('prev-doc-1');
-      if (AppState.documentBlobs.doc1) {
-        doc1El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc1}" download="${AppState.documentNames.doc1 || 'ACRA_BizFile.pdf'}">📥 ${AppState.documentNames.doc1 || 'ACRA_BizFile.pdf'}</a>`;
-      } else {
-        doc1El.innerText = 'Not Uploaded';
-      }
+        if (AppState.consent) {
+          document.getElementById('chkConsent').checked = true;
+          updateTelemetry('sig-consent', 'PASS', 'pass');
+        }
 
-      const doc2El = document.getElementById('prev-doc-2');
-      if (AppState.documentBlobs.doc2) {
-        doc2El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc2}" download="${AppState.documentNames.doc2 || 'Board_Resolution.pdf'}">📥 ${AppState.documentNames.doc2 || 'Board_Resolution.pdf'}</a>`;
-      } else {
-        doc2El.innerText = 'Not Uploaded';
-      }
+        if (AppState.acraVerified) {
+          updateTelemetry('sig-acra', 'VERIFIED', 'pass');
+          document.getElementById('acraResultCard').style.display = 'block';
 
-      const doc3El = document.getElementById('prev-doc-3');
-      if (AppState.documentBlobs.doc3) {
-        doc3El.innerHTML = `<a class="download-link" href="${AppState.documentBlobs.doc3}" download="${AppState.documentNames.doc3 || 'Commercial_Proof.pdf'}">📥 ${AppState.documentNames.doc3 || 'Commercial_Proof.pdf'}</a>`;
-      } else {
-        doc3El.innerText = 'Not Uploaded';
-      }
+          // Format stored or fallback timestamp into SGT
+          const rawTimestamp = AppState.acraTimestamp || new Date();
+          const sgtFormatted = formatSGT(rawTimestamp);
 
-      // 5. Financial Profile & Regulatory Screening
-      document.getElementById('prev-sow').innerText = localStorage.getItem('regflow_selSow') || 'Not Selected';
-      document.getElementById('prev-turnover').innerText = localStorage.getItem('regflow_selTurnover') || 'Not Selected';
-      document.getElementById('prev-maxtx').innerText = localStorage.getItem('regflow_inpMaxTx') ? `$${Number(localStorage.getItem('regflow_inpMaxTx')).toLocaleString()} SGD` : 'Not Provided';
-      document.getElementById('prev-remittance').innerText = localStorage.getItem('regflow_inpRemittance') || 'Not Provided';
-      document.getElementById('prev-fatca').innerText = localStorage.getItem('regflow_selFatca') || 'Not Selected';
-      document.getElementById('prev-tin').innerText = localStorage.getItem('regflow_inpTin') || 'Not Provided';
+          document.getElementById('acraResultTimestamp').innerText = `FETCHED: ${sgtFormatted} (SGT)`;
+          document.getElementById('res-company').innerText = document.getElementById('inpCompany').value || '-';
+          document.getElementById('res-country').innerText = document.getElementById('selCountry').value || '-';
+          document.getElementById('res-incdate').innerText = document.getElementById('incDate').value || '-';
+          document.getElementById('res-capital').innerText = document.getElementById('inpCapital').value ? `SGD $${Number(document.getElementById('inpCapital').value).toLocaleString()}` : '-';
+          document.getElementById('res-ssic').innerText = document.getElementById('selSsic').value || '-';
+          document.getElementById('res-website').innerText = document.getElementById('inpWebsite').value || '-';
+          document.getElementById('res-address').innerText = document.getElementById('inpAddress').value || '-';
+        }
+
+        if (AppState.singpassRetrieved) {
+          updateTelemetry('sig-bio', 'PASS (98%)', 'pass');
+          document.getElementById('singpassBoxContainer').style.display = 'none';
+          document.getElementById('inpName').disabled = false;
+          document.getElementById('inpId').disabled = false;
+          document.getElementById('selNationality').disabled = false;
+          document.getElementById('inpResAddress').disabled = false;
+        }
+
+        if (AppState.documentsUploaded) {
+          Object.keys(AppState.documentsUploaded).forEach(docKey => {
+            if (AppState.documentsUploaded[docKey]) {
+              const badge = document.getElementById(`badge-wiz${docKey.replace('doc', '')}`);
+              if (badge) {
+                badge.innerText = 'VERIFIED';
+                badge.className = 'doc-wizard-badge badge-verified';
+              }
+            }
+          });
+        }
+
+        if (AppState.currentStep > 1) {
+          navigate(AppState.currentStep, true);
+        }
+      } catch (e) {
+        console.error("Failed to load state from LocalStorage:", e);
+      }
     }
 
-    function updateTopProgress(step) {
-      document.getElementById('topProgressFill').style.width = ((step / 8) * 100) + '%';
+    /* TELEMETRY HELPERS */
+    function updateTelemetry(id, text, type) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.innerText = text;
+        el.className = `telemetry-val ${type}`;
+      }
     }
 
-    function showToast(text, isError = false) {
+    function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${isError ? 'toast-error' : ''}`;
-      t.innerHTML = `<span>${isError ? '⚠️' : 'ℹ'}</span> <span>${text}</span>`;
-      container.appendChild(t);
-      setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transform = 'translateX(20px)';
-        t.style.transition = 'all 0.35s var(--easing-standard)';
-        setTimeout(() => t.remove(), 350);
-      }, 3200);
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
+      toast.innerHTML = `<span>${type === 'error' ? '⚠️' : 'ℹ️'}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
     }
 
-    function navigate(step) {
-      if (step > AppState.currentStep) {
-        if (!validateCurrentStepRequiredFields(AppState.currentStep)) return;
-      }
+    /* NAVIGATION LOGIC */
+    function navigate(stepNum, skipValidation = false) {
+      if (stepNum < 1 || stepNum > 8) return;
 
       const currentPanel = document.getElementById(`panel-${AppState.currentStep}`);
-      const nextPanel = document.getElementById(`panel-${step}`);
+      const targetPanel = document.getElementById(`panel-${stepNum}`);
 
-      if (currentPanel) {
-        currentPanel.style.opacity = '0';
-        currentPanel.style.transform = 'translateY(-15px) scale(0.98)';
-        setTimeout(() => {
-          currentPanel.classList.remove('active');
-          activateNextPanel(nextPanel, step);
-        }, 200);
-      } else {
-        activateNextPanel(nextPanel, step);
-      }
-    }
+      if (currentPanel) currentPanel.classList.remove('active');
+      if (targetPanel) targetPanel.classList.add('active');
 
-    function activateNextPanel(nextPanel, step) {
-      nextPanel.classList.add('active');
-      setTimeout(() => {
-        nextPanel.style.opacity = '1';
-        nextPanel.style.transform = 'translateY(0) scale(1)';
-      }, 50);
+      AppState.currentStep = stepNum;
 
+      // Update Top Progress Fill
+      const topFill = document.getElementById('topProgressFill');
+      if (topFill) topFill.style.width = `${(stepNum / 8) * 100}%`;
+
+      // Update Sidebar Items
       document.querySelectorAll('.workflow-item').forEach(item => {
-        const s = parseInt(item.getAttribute('data-step'));
-        item.classList.remove('active', 'completed');
-        if (s === step) item.classList.add('active');
-        else if (s < step) {
+        const itemStep = parseInt(item.getAttribute('data-step'), 10);
+        item.classList.remove('active');
+        if (itemStep === stepNum) {
+          item.classList.add('active');
+        }
+        if (itemStep < stepNum) {
           item.classList.add('completed');
-          item.querySelector('.workflow-node').innerText = '✓';
         } else {
-          item.querySelector('.workflow-node').innerText = s;
+          item.classList.remove('completed');
         }
       });
 
-      AppState.currentStep = step;
-      updateTopProgress(step);
+      if (stepNum === 8) {
+        renderComprehensiveSummary();
+        calculateAndRenderFinalOutcome();
+      }
 
-      if (step === 8) populatePreview();
+      saveToLocalStorage();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    /* STEP 1: CONSENT */
     function submitConsent() {
-      if (!validateCurrentStepRequiredFields(1)) return;
+      const chk = document.getElementById('chkConsent');
+      if (!chk || !chk.checked) {
+        showToast('You must accept the terms and biometric processing consent to proceed.', 'error');
+        return;
+      }
       AppState.consent = true;
-      const sig = document.getElementById('sig-consent');
-      sig.innerText = 'Captured';
-      sig.className = 'telemetry-val pass';
-      saveAllState();
+      updateTelemetry('sig-consent', 'PASS', 'pass');
       navigate(2);
     }
 
+    /* STEP 2: CORPORATE DETAILS / ACRA LOOKUP */
     function runAcraQuery() {
-      if (!validateCurrentStepRequiredFields(2)) return;
+      const uenInput = document.getElementById('inpUen');
+      const uen = uenInput?.value.trim().toUpperCase();
 
-      if (AppState.acraVerified) {
-        navigate(3);
+      if (!uen) {
+        uenInput.classList.add('input-error');
+        showToast('Please enter a valid Singapore UEN / Entity ID.', 'error');
+        return;
+      }
+      uenInput.classList.remove('input-error');
+
+      const btn = document.getElementById('btnAcra');
+      const consoleBox = document.getElementById('acraConsole');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Querying ACRA...`;
+      consoleBox.style.display = 'flex';
+      consoleBox.innerHTML = '';
+
+      const logs = [
+        `[ACRA-API] Initializing mTLS connection to ACRA Business Registry...`,
+        `[ACRA-API] Querying UEN: ${uen}...`,
+        `[ACRA-API] Entity record matched. Fetching BizFile metadata...`,
+        `[ACRA-API] Verification successful. Entity active and compliant.`
+      ];
+
+      let delay = 0;
+      logs.forEach((log, index) => {
+        delay += 500;
+        setTimeout(() => {
+          const line = document.createElement('div');
+          line.className = 'console-line';
+          line.innerText = log;
+          consoleBox.appendChild(line);
+          consoleBox.scrollTop = consoleBox.scrollHeight;
+
+          if (index === logs.length - 1) {
+            btn.disabled = false;
+            btn.innerHTML = `Retrieve from ACRA`;
+
+            // Auto fill mock ACRA data
+            document.getElementById('selCountry').value = 'Singapore';
+            document.getElementById('inpCompany').value = 'REGFLOW AI PTE. LTD.';
+            document.getElementById('incDate').value = '2023-01-15';
+            document.getElementById('selSsic').value = '62014 - Development of artificial intelligence and machine learning models';
+            document.getElementById('inpCapital').value = '500000';
+            document.getElementById('inpWebsite').value = 'https://www.regflow.ai';
+            document.getElementById('inpAddress').value = '71 AYER RAJAH CRESCENT, #02-18, SINGAPORE 139951';
+
+            // Record timestamp
+            AppState.acraTimestamp = new Date().toISOString();
+            AppState.acraVerified = true;
+
+            // Show Result Card with SGT formatting
+            document.getElementById('acraResultCard').style.display = 'block';
+            document.getElementById('acraResultTimestamp').innerText = `FETCHED: ${formatSGT(AppState.acraTimestamp)} (SGT)`;
+            document.getElementById('res-company').innerText = 'REGFLOW AI PTE. LTD.';
+            document.getElementById('res-country').innerText = 'Singapore';
+            document.getElementById('res-incdate').innerText = '2023-01-15';
+            document.getElementById('res-capital').innerText = 'SGD $500,000';
+            document.getElementById('res-ssic').innerText = '62014 - Artificial intelligence & machine learning development';
+            document.getElementById('res-website').innerText = 'https://www.regflow.ai';
+            document.getElementById('res-address').innerText = '71 AYER RAJAH CRESCENT, #02-18, SINGAPORE 139951';
+
+            updateTelemetry('sig-acra', 'VERIFIED', 'pass');
+            saveToLocalStorage();
+            showToast('ACRA Corporate Details retrieved successfully!');
+          }
+        }, delay);
+      });
+    }
+
+    function submitCorporateDetails() {
+      const uen = document.getElementById('inpUen').value.trim();
+      const company = document.getElementById('inpCompany').value.trim();
+
+      if (!uen || !company) {
+        showToast('Please perform an ACRA search or complete corporate details before proceeding.', 'error');
+        return;
+      }
+      navigate(3);
+    }
+
+    /* STARTS SINGPASS BIOMETRIC FLOW */
+    async function startSingpassFlow() {
+      const bioWrapper = document.getElementById('bioWrapper');
+      const btnSingpass = document.getElementById('btnSingpassTrigger');
+
+      if (AppState.singpassRetrieved) {
+        showToast('Singpass MyInfo data has already been retrieved.', 'info');
         return;
       }
 
-      const uen = document.getElementById('inpUen').value.trim();
-      const comp = document.getElementById('inpCompany').value.trim();
-      const btn = document.getElementById('btnAcra');
-      const box = document.getElementById('acraConsole');
-
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> SCANNING...`;
-      box.style.display = 'flex';
-      box.innerHTML = '';
-
-      const logs = [
-        `[QUERY] Connecting to ACRA API Gateway...`,
-        `[FOUND] Registration Record Match: "${uen.toUpperCase()}"`,
-        `[STATUS] Entity Name: "${comp}" | Status: LIVE`,
-        `[CHECKSUM] Algorithmic Registry Signature Verified.`
-      ];
-
-      let idx = 0;
-      const interval = setInterval(() => {
-        if (idx < logs.length) {
-          const l = document.createElement('div');
-          l.className = 'console-line';
-          l.innerText = logs[idx];
-          box.appendChild(l);
-          box.scrollTop = box.scrollHeight;
-          idx++;
-        } else {
-          clearInterval(interval);
-          AppState.acraVerified = true;
-
-          btn.disabled = false;
-          btn.innerHTML = `CONTINUE`;
-
-          const sig = document.getElementById('sig-acra');
-          sig.innerText = 'Verified';
-          sig.className = 'telemetry-val pass';
-
-          saveAllState();
-          showToast('ACRA Scan Complete! Click CONTINUE to proceed.');
-        }
-      }, 500);
-    }
-
-    /* Biometric Sequence Engine */
-    let videoStream = null;
-    let animId = null;
-
-    async function startSingpassFlow() {
-      const btnSingpass = document.getElementById('btnSingpassTrigger');
-      const wrapper = document.getElementById('bioWrapper');
-      
+      // 1. Show facial recognition camera box
+      bioWrapper.style.display = 'flex';
       btnSingpass.disabled = true;
-      btnSingpass.innerHTML = `<span class="spinner"></span> Connecting Singpass...`;
 
-      wrapper.style.display = 'flex';
-      wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      const video = document.getElementById('webcam');
       try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = videoStream;
+        // Attempt camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById('webcam');
+        video.srcObject = stream;
+
+        runBiometricScan(stream);
       } catch (err) {
-        console.warn('Camera stream direct capture fallback applied.');
+        // Fallback simulation if no camera hardware is available
+        document.getElementById('bioPrompt').innerText = "Camera Access Required";
+        document.getElementById('bioSubPrompt').innerText = "Simulating Singpass Liveness Check...";
+        setTimeout(() => {
+          completeBiometricVerification(null);
+        }, 2500);
       }
-
-      renderBiometricCanvas();
-      executeLivenessSequence();
     }
 
-    function renderBiometricCanvas() {
-      const canvas = document.getElementById('bioCanvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = canvas.offsetWidth || 200;
-      canvas.height = canvas.offsetHeight || 200;
-
-      let frame = 0;
-      function loop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 65 + Math.sin(frame * 0.08) * 4, 0, Math.PI * 2);
-        ctx.stroke();
-
-        frame++;
-        animId = requestAnimationFrame(loop);
-      }
-      loop();
-    }
-
-    function executeLivenessSequence() {
+    /* SIMULATES BIOMETRIC SCANNING PROGRESS */
+    function runBiometricScan(stream) {
       const prompt = document.getElementById('bioPrompt');
       const subPrompt = document.getElementById('bioSubPrompt');
 
-      const motions = [
-        { text: "Align face inside oval frame 🎯", sub: "Detecting facial coordinates..." },
-        { text: "Slowly turn your head to the LEFT ⬅️", sub: "Motion vector detected: yaw +24°" },
-        { text: "Slowly turn your head to the RIGHT ➡️", sub: "Motion vector detected: yaw -22°" },
-        { text: "Blink both eyes slowly 👁️", sub: "Liveness blink signature verified" },
-        { text: "Hold still for final biometric snapshot 📸", sub: "Extracting 128-D facial vector mesh..." }
-      ];
-
-      let step = 0;
-      const interval = setInterval(() => {
-        if (step < motions.length) {
-          prompt.innerText = motions[step].text;
-          subPrompt.innerText = motions[step].sub;
-          step++;
-        } else {
-          clearInterval(interval);
-          if (animId) cancelAnimationFrame(animId);
-
-          AppState.biometricScore = (98.6 + Math.random() * 1.1).toFixed(1);
-          AppState.facePassed = true;
-
-          if (videoStream) {
-            videoStream.getTracks().forEach(t => t.stop());
-          }
-
-          const bioWrapper = document.getElementById('bioWrapper');
-          if (bioWrapper) bioWrapper.style.display = 'none';
-
-          autofillDirectorData("ALEX TAN WEI MING", "S8812345A", "Singaporean", "123 ANG MO KIO AVE 3, #08-456, SINGAPORE 560123");
-        }
+      prompt.innerText = "Position face in center...";
+      
+      setTimeout(() => {
+        prompt.innerText = "Hold still — Verifying Biometrics...";
       }, 1200);
+
+      setTimeout(() => {
+        completeBiometricVerification(stream);
+      }, 3200);
     }
 
-    function autofillDirectorData(name, id, nationality, address, notify = true) {
-      const btnSingpass = document.getElementById('btnSingpassTrigger');
-      if (btnSingpass) {
-        btnSingpass.innerText = 'MyInfo Retrieved ✓';
-        btnSingpass.disabled = true;
-        btnSingpass.style.backgroundColor = 'var(--emerald-primary)';
+    /* LOGICAL SUCCESS STATE UPDATE */
+    function completeBiometricVerification(stream) {
+      // Stop webcam stream if active
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
       }
 
-      const nameInp = document.getElementById('inpName');
-      const idInp = document.getElementById('inpId');
-      const natSel = document.getElementById('selNationality');
-      const addrInp = document.getElementById('inpResAddress');
-
-      if (nameInp) { nameInp.value = name; nameInp.readOnly = true; }
-      if (idInp) { idInp.value = id; idInp.readOnly = true; }
-      if (natSel) { natSel.value = nationality; natSel.disabled = true; }
-      if (addrInp) { addrInp.value = address; addrInp.readOnly = true; }
-
+      // Update State Flags
       AppState.singpassRetrieved = true;
       AppState.facePassed = true;
+      AppState.biometricScore = 98.4;
 
-      const sig = document.getElementById('sig-bio');
-      if (sig) {
-        sig.innerText = `${AppState.biometricScore || '98.8'}% Match`;
-        sig.className = 'telemetry-val pass';
+      // Update Telemetry Monitor Indicator
+      const sigBio = document.getElementById('sig-bio');
+      if (sigBio) {
+        sigBio.innerText = "PASS (98.4%)";
+        sigBio.className = "telemetry-val pass";
       }
 
-      localStorage.setItem('regflow_singpass_done', 'true');
-      saveAllState();
-      
-      if (notify) {
-        showToast('Singpass MyInfo verified! Fields populated and locked.');
-      }
+      // 1. Hide Biometric Viewport
+      document.getElementById('bioWrapper').style.display = 'none';
+
+      // 2. Change Red Button Text & Disable It
+      const btnSingpass = document.getElementById('btnSingpassTrigger');
+      btnSingpass.innerText = "Retrieved Singpass MyInfo";
+      btnSingpass.style.backgroundColor = "var(--emerald-primary)";
+      btnSingpass.style.cursor = "default";
+      btnSingpass.disabled = true;
+
+      document.getElementById('singpassBoxDesc').innerText = "Singpass verification completed successfully. MyInfo fields populated below.";
+
+      // 3. Populate Director Fields from Singpass MyInfo
+      document.getElementById('inpName').value = "TAN WEI MING";
+      document.getElementById('inpId').value = "S9876543A";
+      document.getElementById('selNationality').value = "Singaporean";
+      document.getElementById('inpResAddress').value = "BLK 123 MARINA BAY RESIDENCES #18-04, SINGAPORE 018982";
+
+      // 4. Reveal Form Fields Logically
+      document.getElementById('directorFieldsContainer').style.display = 'block';
+
+      // Save State
+      saveToLocalStorage();
+      showToast("Singpass MyInfo and Facial Verification successful!", "success");
     }
 
+    /* STEP NAVIGATION VALIDATION FOR PANEL 3 */
     function handleBioNextStep() {
-      if (!validateCurrentStepRequiredFields(3)) return;
-      saveAllState();
+      if (!AppState.singpassRetrieved) {
+        showToast("Please complete Singpass MyInfo retrieval before proceeding.", "error");
+        return;
+      }
+
+      const pep = document.getElementById('selPep').value;
+      if (!pep) {
+        showToast("Please select the PEP Status.", "error");
+        document.getElementById('selPep').classList.add('input-error');
+        return;
+      }
+
+      document.getElementById('selPep').classList.remove('input-error');
       navigate(4);
     }
 
-    let uboCounter = 1;
-
-    function saveUboState() {
-      const uboCards = document.querySelectorAll('.ubo-item');
-      const ubos = [];
-      uboCards.forEach(card => {
-        const name = card.querySelector('.ubo-name')?.value || '';
-        const shares = card.querySelector('.ubo-shares')?.value || '';
-        const taxRes = card.querySelector('.ubo-tax-res')?.value || '';
-        const pep = card.querySelector('.ubo-pep')?.value || 'No — Not a PEP';
-        ubos.push({ name, shares, taxRes, pep });
-      });
-      localStorage.setItem('regflow_ubos', JSON.stringify(ubos));
-    }
-
-    function restoreUboState() {
-      const saved = localStorage.getItem('regflow_ubos');
-      if (!saved) return;
-      try {
-        const ubos = JSON.parse(saved);
-        if (!Array.isArray(ubos) || ubos.length === 0) return;
-
-        const container = document.getElementById('ubo-container');
-        container.innerHTML = '';
-        uboCounter = 0;
-
-        ubos.forEach(item => {
-          uboCounter++;
-          const uboCard = document.createElement('div');
-          uboCard.className = 'repeater-box ubo-item';
-          uboCard.innerHTML = `
-            <div class="repeater-header">
-              <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${uboCounter}</span>
-              ${uboCounter > 1 ? '<button type="button" class="btn-remove-ubo" onclick="this.closest(\'.ubo-item\').remove(); saveAllState();">Remove UBO ✕</button>' : ''}
-            </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>UBO Full Name *</label>
-                <input type="text" class="ubo-name" value="${item.name || ''}" required placeholder="Enter UBO's full legal name" />
-              </div>
-              <div class="form-group">
-                <label>Ownership / Voting Rights % *</label>
-                <input type="number" class="ubo-shares" value="${item.shares || ''}" required placeholder="Enter Percentage" min="1" max="100" />
-              </div>
-              <div class="form-group">
-                <label>Tax Residence Jurisdiction *</label>
-                <input type="text" class="ubo-tax-res" value="${item.taxRes || ''}" required placeholder="Enter tax residence" />
-              </div>
-              <div class="form-group">
-                <label>PEP Status *</label>
-                <select class="ubo-pep" required>
-                  <option value="No — Not a PEP" ${item.pep === 'No — Not a PEP' ? 'selected' : ''}>No — Not a PEP</option>
-                  <option value="Yes — Domestic PEP" ${item.pep === 'Yes — Domestic PEP' ? 'selected' : ''}>Yes — Domestic PEP</option>
-                  <option value="Yes — Foreign PEP" ${item.pep === 'Yes — Foreign PEP' ? 'selected' : ''}>Yes — Foreign PEP</option>
-                  <option value="Yes — International Org PEP" ${item.pep === 'Yes — International Org PEP' ? 'selected' : ''}>Yes — International Org PEP</option>
-                  <option value="Yes — Family / Associate of PEP" ${item.pep === 'Yes — Family / Associate of PEP' ? 'selected' : ''}>Yes — Family / Associate of PEP</option>
-                </select>
-              </div>
-            </div>
-          `;
-          container.appendChild(uboCard);
-        });
-
-        container.querySelectorAll('input, select').forEach(el => {
-          el.addEventListener('input', saveAllState);
-          el.addEventListener('change', saveAllState);
-        });
-      } catch(e) {
-        console.error('Error restoring UBOs:', e);
-      }
-    }
-
+    /* STEP 4: UBO REPEATER */
+    let uboCount = 1;
     function addUboField() {
-      uboCounter++;
+      uboCount++;
       const container = document.getElementById('ubo-container');
-      const uboCard = document.createElement('div');
-      uboCard.className = 'repeater-box ubo-item';
-      uboCard.innerHTML = `
+      const div = document.createElement('div');
+      div.className = 'repeater-box ubo-item';
+      div.innerHTML = `
         <div class="repeater-header">
-          <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${uboCounter}</span>
-          <button type="button" class="btn-remove-ubo" onclick="this.closest('.ubo-item').remove(); saveAllState();">Remove UBO ✕</button>
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${uboCount}</span>
+          <button type="button" class="btn-remove-ubo" onclick="this.closest('.ubo-item').remove(); updateUboChecksum();">✕ Remove UBO</button>
         </div>
         <div class="form-grid">
           <div class="form-group">
             <label>UBO Full Name *</label>
-            <input type="text" class="ubo-name" required placeholder="Enter UBO's full legal name" />
+            <input type="text" class="ubo-name" placeholder="Enter UBO's full legal name" required />
           </div>
           <div class="form-group">
             <label>Ownership / Voting Rights % *</label>
-            <input type="number" class="ubo-shares" required placeholder="Enter Percentage" min="1" max="100" />
+            <input type="number" class="ubo-shares" placeholder="Enter percentage" min="1" max="100" required />
           </div>
           <div class="form-group">
             <label>Tax Residence Jurisdiction *</label>
-            <input type="text" class="ubo-tax-res" required placeholder="Enter tax residence" />
+            <input type="text" class="ubo-tax-res" placeholder="Enter tax residence" required />
           </div>
           <div class="form-group">
             <label>PEP Status *</label>
@@ -3014,159 +3030,566 @@
           </div>
         </div>
       `;
-      container.appendChild(uboCard);
+      container.appendChild(div);
+      saveToLocalStorage();
+    }
 
-      uboCard.querySelectorAll('input, select').forEach(el => {
-        el.addEventListener('input', saveAllState);
-        el.addEventListener('change', saveAllState);
+    function addUboFieldWithData(idx, data) {
+      const container = document.getElementById('ubo-container');
+      const div = document.createElement('div');
+      div.className = 'repeater-box ubo-item';
+      div.innerHTML = `
+        <div class="repeater-header">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--blue-light);">Beneficial Owner #${idx}</span>
+          ${idx > 1 ? `<button type="button" class="btn-remove-ubo" onclick="this.closest('.ubo-item').remove(); updateUboChecksum();">✕ Remove UBO</button>` : ''}
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>UBO Full Name *</label>
+            <input type="text" class="ubo-name" value="${data.name || ''}" placeholder="Enter UBO's full legal name" required />
+          </div>
+          <div class="form-group">
+            <label>Ownership / Voting Rights % *</label>
+            <input type="number" class="ubo-shares" value="${data.shares || ''}" placeholder="Enter percentage" min="1" max="100" required />
+          </div>
+          <div class="form-group">
+            <label>Tax Residence Jurisdiction *</label>
+            <input type="text" class="ubo-tax-res" value="${data.taxRes || ''}" placeholder="Enter tax residence" required />
+          </div>
+          <div class="form-group">
+            <label>PEP Status *</label>
+            <select class="ubo-pep" required>
+              <option value="No — Not a PEP" ${data.pep === 'No — Not a PEP' ? 'selected' : ''}>No — Not a PEP</option>
+              <option value="Yes — Domestic PEP" ${data.pep === 'Yes — Domestic PEP' ? 'selected' : ''}>Yes — Domestic PEP</option>
+              <option value="Yes — Foreign PEP" ${data.pep === 'Yes — Foreign PEP' ? 'selected' : ''}>Yes — Foreign PEP</option>
+              <option value="Yes — International Org PEP" ${data.pep === 'Yes — International Org PEP' ? 'selected' : ''}>Yes — International Org PEP</option>
+              <option value="Yes — Family / Associate of PEP" ${data.pep === 'Yes — Family / Associate of PEP' ? 'selected' : ''}>Yes — Family / Associate of PEP</option>
+            </select>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function updateUboChecksum() {
+      let totalShares = 0;
+      let valid = true;
+
+      document.querySelectorAll('.ubo-item').forEach(item => {
+        const name = item.querySelector('.ubo-name')?.value.trim();
+        const shares = parseFloat(item.querySelector('.ubo-shares')?.value || 0);
+
+        if (!name || isNaN(shares) || shares <= 0) valid = false;
+        totalShares += shares;
       });
-      saveAllState();
+
+      if (valid && totalShares > 0) {
+        updateTelemetry('sig-ubo', `${totalShares}% LOGGED`, totalShares >= 100 ? 'pass' : 'pending');
+      } else {
+        updateTelemetry('sig-ubo', 'PENDING', 'neutral');
+      }
+      saveToLocalStorage();
     }
 
     function submitUbos() {
-      if (!validateCurrentStepRequiredFields(4)) return;
-      const sig = document.getElementById('sig-ubo');
-      sig.innerText = 'Pass (Verified)';
-      sig.className = 'telemetry-val pass';
-      saveAllState();
-      navigate(5);
-    }
+      let valid = true;
+      let totalShares = 0;
 
-    function submitCdd() {
-      if (!validateCurrentStepRequiredFields(5)) return;
-      const pepVal = document.getElementById('selPep').value;
-      AppState.riskFactors.pep = pepVal.includes('Yes') ? 50 : 0;
-      saveAllState();
-      navigate(6);
-    }
+      document.querySelectorAll('.ubo-item').forEach(item => {
+        const name = item.querySelector('.ubo-name')?.value.trim();
+        const shares = parseFloat(item.querySelector('.ubo-shares')?.value || 0);
+        const taxRes = item.querySelector('.ubo-tax-res')?.value.trim();
 
-    /* AML SCREEN & CONTINUE BUTTON HANDLER */
-    function handleAmlButtonClick() {
-      if (!validateCurrentStepRequiredFields(7)) return;
+        if (!name || !shares || !taxRes) valid = false;
+        totalShares += shares;
+      });
 
-      if (AppState.amlCleared) {
-        validateAndExecuteRisk();
+      if (!valid) {
+        showToast('Please fill out all UBO fields accurately.', 'error');
         return;
       }
 
-      runAmlEngine();
+      updateTelemetry('sig-ubo', `${totalShares}% VERIFIED`, 'pass');
+      navigate(5);
     }
 
-    function runAmlEngine() {
+    /* STEP 5: FINANCIAL PROFILE & CDD */
+    function submitCdd() {
+      const sow = document.getElementById('selSow').value;
+      const turnover = document.getElementById('selTurnover').value;
+      const maxtx = document.getElementById('inpMaxTx').value;
+      const remittance = document.getElementById('inpRemittance').value.trim();
+
+      if (!sow || !turnover || !maxtx || !remittance) {
+        showToast('Please complete all financial activity and source of wealth details.', 'error');
+        return;
+      }
+      navigate(6);
+    }
+
+    /* STEP 6: VERIFICATION WIZARD */
+    function setBizProfileMode(mode) {
+      AppState.bizProfileMode = mode;
+      const btnAcra = document.getElementById('btn-toggle-acra');
+      const btnUpload = document.getElementById('btn-toggle-upload');
+      const containerAcra = document.getElementById('mode-acra-container');
+      const containerUpload = document.getElementById('mode-upload-container');
+
+      if (mode === 'acra') {
+        btnAcra.classList.add('active');
+        btnUpload.classList.remove('active');
+        containerAcra.style.display = 'block';
+        containerUpload.style.display = 'none';
+      } else {
+        btnUpload.classList.add('active');
+        btnAcra.classList.remove('active');
+        containerUpload.style.display = 'block';
+        containerAcra.style.display = 'none';
+      }
+    }
+
+    function executeAcraFetchWizard() {
+      const btn = document.getElementById('btn-fetch-acra');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Fetching BizFile from Registry...`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = `✓ BizFile Profile Fetched (ACRA Registry)`;
+        btn.style.borderColor = 'var(--emerald-primary)';
+        btn.style.color = 'var(--emerald-light)';
+
+        AppState.bizProfileFetched = true;
+        AppState.documentsUploaded.doc1 = true;
+        AppState.documentNames.doc1 = 'ACRA_BizFile_Extract_Official.pdf';
+
+        const badge = document.getElementById('badge-wiz1');
+        badge.innerText = 'VERIFIED';
+        badge.className = 'doc-wizard-badge badge-verified';
+
+        checkAllDocsStatus();
+        saveToLocalStorage();
+        showToast('Official ACRA BizFile fetched and verified.');
+      }, 1500);
+    }
+
+    function handleFileSelected(docKey, docLabel) {
+      const input = document.getElementById(`file-${docKey}`);
+      if (input && input.files && input.files[0]) {
+        const file = input.files[0];
+        AppState.documentsUploaded[docKey] = true;
+        AppState.documentBlobs[docKey] = file;
+        AppState.documentNames[docKey] = file.name;
+
+        const dropzone = document.getElementById(`dropzone-${docKey}`);
+        if (dropzone) dropzone.classList.add('has-file');
+
+        const text = document.getElementById(`text-${docKey}`);
+        if (text) text.innerText = `Attached: ${file.name}`;
+
+        const badgeKey = docKey.replace('doc', '');
+        const badge = document.getElementById(`badge-wiz${badgeKey}`);
+        if (badge) {
+          badge.innerText = 'VERIFIED';
+          badge.className = 'doc-wizard-badge badge-verified';
+        }
+
+        checkAllDocsStatus();
+        saveToLocalStorage();
+        showToast(`${docLabel} uploaded successfully!`);
+      }
+    }
+
+    function checkAllDocsStatus() {
+      const { doc1, doc2, doc3 } = AppState.documentsUploaded;
+      if (doc1 && doc2 && doc3) {
+        updateTelemetry('sig-docs', 'ALL VERIFIED', 'pass');
+      } else {
+        const count = [doc1, doc2, doc3].filter(Boolean).length;
+        updateTelemetry('sig-docs', `${count}/3 READY`, 'pending');
+      }
+    }
+
+    function submitVerificationWizard() {
+      const { doc1, doc2, doc3 } = AppState.documentsUploaded;
+      if (!doc1 || !doc2 || !doc3) {
+        showToast('Please submit or fetch all required verification documents.', 'error');
+        return;
+      }
+      navigate(7);
+    }
+
+    /* STEP 7: AML SCREENING ENGINE */
+    function handleAmlButtonClick() {
+      const fatca = document.getElementById('selFatca').value;
+      const tin = document.getElementById('inpTin').value.trim();
+
+      if (!fatca || !tin) {
+        showToast('Please select FATCA classification and enter Tax Identification Number.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnAml');
       const barContainer = document.getElementById('amlBarContainer');
       const bar = document.getElementById('amlBar');
-      const box = document.getElementById('amlConsole');
-      const btn = document.getElementById('btnAml');
-
-      barContainer.style.display = 'block';
-      box.style.display = 'flex';
-      box.innerHTML = '';
-      bar.style.width = '0%';
+      const consoleBox = document.getElementById('amlConsole');
 
       btn.disabled = true;
       btn.innerHTML = `<span class="spinner"></span> SCREENING...`;
+      barContainer.style.display = 'block';
+      consoleBox.style.display = 'flex';
+      consoleBox.innerHTML = '';
+      bar.style.width = '0%';
 
-      const dbs = [
-        `UN Sanctions Consolidated List`,
-        `MAS Financial Sanctions Designation`,
-        `Interpol Red Notice Database`,
-        `OFAC Specially Designated Nationals List`
+      const company = document.getElementById('inpCompany').value || 'ENTITY';
+      const director = document.getElementById('inpName').value || 'DIRECTOR';
+
+      const screeningLogs = [
+        `[AML-ENGINE] Initializing screening protocols for ${company}...`,
+        `[SANCTIONS] Cross-referencing UN Security Council Consolidated List... MATCH: 0`,
+        `[SANCTIONS] Querying US OFAC SDN & Blocked Persons List... MATCH: 0`,
+        `[MAS-626] Checking MAS Notice 626 Prohibited Entities Index... MATCH: 0`,
+        `[INTERPOL] Querying Interpol Red Notices database for ${director}... MATCH: 0`,
+        `[PEP-CHECK] Validating PEP exposure index for declared officers... LOW RISK`,
+        `[FATCA-ENGINE] Validating TIN/UEN ${tin} format & tax residency... VALID`,
+        `[AML-ENGINE] Screening Complete. Risk Index Computed.`
       ];
 
-      let idx = 0;
-      let pct = 0;
+      let progress = 0;
+      let delay = 0;
 
-      const interval = setInterval(() => {
-        if (idx < dbs.length) {
-          pct += 25;
-          bar.style.width = pct + '%';
+      screeningLogs.forEach((log, index) => {
+        delay += 400;
+        setTimeout(() => {
+          progress += 12.5;
+          bar.style.width = `${progress}%`;
 
           const line = document.createElement('div');
           line.className = 'console-line';
-          line.innerText = `[SCANNING] Querying ${dbs[idx]}... 0 Matches.`;
-          box.appendChild(line);
-          box.scrollTop = box.scrollHeight;
-          idx++;
+          line.innerText = log;
+          consoleBox.appendChild(line);
+          consoleBox.scrollTop = consoleBox.scrollHeight;
+
+          if (index === screeningLogs.length - 1) {
+            btn.disabled = false;
+            btn.innerHTML = `✓ SCREENING PASSED — PROCEED TO FINAL DECISION →`;
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-warning');
+            btn.onclick = () => navigate(8);
+
+            AppState.amlCleared = true;
+            updateTelemetry('sig-aml', 'CLEARED', 'pass');
+            saveToLocalStorage();
+            showToast('AML & Sanctions Screening Completed. Zero Hits Found.');
+          }
+        }, delay);
+      });
+    }
+
+    /* STEP 8: FINAL SUMMARY & COMPOSITE RISK ENGINE */
+    function renderComprehensiveSummary() {
+      document.getElementById('prev-country').innerText = document.getElementById('selCountry').value || 'Singapore';
+      document.getElementById('prev-uen').innerText = document.getElementById('inpUen').value || '-';
+      document.getElementById('prev-company').innerText = document.getElementById('inpCompany').value || '-';
+      document.getElementById('prev-incdate').innerText = document.getElementById('incDate').value || '-';
+      document.getElementById('prev-ssic').innerText = document.getElementById('selSsic').value || '-';
+      document.getElementById('prev-capital').innerText = document.getElementById('inpCapital').value ? `SGD $${Number(document.getElementById('inpCapital').value).toLocaleString()}` : '-';
+      document.getElementById('prev-website').innerText = document.getElementById('inpWebsite').value || '-';
+      document.getElementById('prev-address').innerText = document.getElementById('inpAddress').value || '-';
+
+      document.getElementById('prev-dir-name').innerText = document.getElementById('inpName').value || '-';
+      document.getElementById('prev-dir-id').innerText = document.getElementById('inpId').value || '-';
+      document.getElementById('prev-dir-nationality').innerText = document.getElementById('selNationality').value || '-';
+      document.getElementById('prev-dir-pep').innerText = document.getElementById('selPep').value || '-';
+      document.getElementById('prev-dir-address').innerText = document.getElementById('inpResAddress').value || '-';
+
+      // Render UBO List
+      const uboContainer = document.getElementById('prev-ubo-list');
+      uboContainer.innerHTML = '';
+      const uboItems = document.querySelectorAll('.ubo-item');
+
+      if (uboItems.length === 0) {
+        uboContainer.innerHTML = `<div class="preview-val-text" style="color: var(--text-muted); font-size: 0.8rem;">No UBOs declared.</div>`;
+      } else {
+        uboItems.forEach((item, idx) => {
+          const name = item.querySelector('.ubo-name')?.value || '-';
+          const shares = item.querySelector('.ubo-shares')?.value || '0';
+          const taxRes = item.querySelector('.ubo-tax-res')?.value || '-';
+          const pep = item.querySelector('.ubo-pep')?.value || '-';
+
+          const card = document.createElement('div');
+          card.className = 'ubo-preview-card';
+          card.innerHTML = `
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--blue-light); margin-bottom: 0.3rem;">UBO #${idx + 1}: ${name}</div>
+            <div style="font-size: 0.775rem; color: var(--text-muted);">Equity Ownership: <strong style="color:#fff">${shares}%</strong> | Tax Residence: <strong style="color:#fff">${taxRes}</strong></div>
+            <div style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 0.2rem;">PEP Status: ${pep}</div>
+          `;
+          uboContainer.appendChild(card);
+        });
+      }
+
+      // Render Documents with Download Links
+      ['doc1', 'doc2', 'doc3'].forEach((docKey, i) => {
+        const el = document.getElementById(`prev-doc-${i + 1}`);
+        if (!el) return;
+
+        const name = AppState.documentNames[docKey] || `Document_${i + 1}.pdf`;
+        const blob = AppState.documentBlobs[docKey];
+
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          el.innerHTML = `<a href="${url}" download="${name}" class="download-link">📄 ${name} (Download)</a>`;
+        } else if (AppState.documentsUploaded[docKey]) {
+          el.innerHTML = `<span class="download-link" style="cursor:default;">✓ ${name} (Verified)</span>`;
         } else {
-          clearInterval(interval);
-          AppState.amlCleared = true;
-
-          const sig = document.getElementById('sig-aml');
-          sig.innerText = 'Clear (0 Hits)';
-          sig.className = 'telemetry-val pass';
-
-          btn.disabled = false;
-          btn.innerText = 'CONTINUE';
-
-          saveAllState();
-          showToast('AML & Sanctions Screening Complete! Click CONTINUE to view results.');
+          el.innerText = 'Not Attached';
         }
-      }, 500);
+      });
+
+      document.getElementById('prev-sow').innerText = document.getElementById('selSow').value || '-';
+      document.getElementById('prev-turnover').innerText = document.getElementById('selTurnover').value || '-';
+      document.getElementById('prev-maxtx').innerText = document.getElementById('inpMaxTx').value ? `SGD $${Number(document.getElementById('inpMaxTx').value).toLocaleString()}` : '-';
+      document.getElementById('prev-remittance').innerText = document.getElementById('inpRemittance').value || '-';
+      document.getElementById('prev-fatca').innerText = document.getElementById('selFatca').value || '-';
+      document.getElementById('prev-tin').innerText = document.getElementById('inpTin').value || '-';
     }
 
-    function evaluateFinalDecision() {
-      // Calculate composite risk score
-      const totalRisk = AppState.riskFactors.industry + AppState.riskFactors.pep;
-      AppState.calculatedScore = totalRisk;
+    function calculateAndRenderFinalOutcome() {
+      let riskScore = 12; // Base inherent risk
 
-      // Element References
-      const outBadge = document.getElementById('outBadge');
-      const outTitle = document.getElementById('outTitle');
-      const outSub = document.getElementById('outSub');
-      const outScore = document.getElementById('outScore');
-      const outBio = document.getElementById('outBio');
-      const outAcra = document.getElementById('outAcra');
-      const outResult = document.getElementById('outResult');
-      const outTime = document.getElementById('outTime');
-      const actionBtn = document.getElementById('btnFinalAction');
+      const pepVal = document.getElementById('selPep').value;
+      if (pepVal && pepVal.includes('Yes')) riskScore += 35;
 
-      // Populate Metrics
-      outScore.innerText = `${AppState.calculatedScore} / 100`;
-      outBio.innerText = `${AppState.biometricScore || '98.8'}% Match`;
-      outAcra.innerText = AppState.acraVerified ? 'VERIFIED (LIVE)' : 'MANUAL REVIEW';
-      outAcra.style.color = AppState.acraVerified ? 'var(--emerald-light)' : 'var(--amber-light)';
-      outTime.innerText = new Date().toISOString();
+      const sowVal = document.getElementById('selSow').value;
+      if (sowVal && sowVal.includes('Investment')) riskScore += 10;
 
-      // Dynamic Decision Logic & Action Button Formatting
-      if (AppState.calculatedScore > 50) {
-        // Escalated / Manual EDD Queue State
-        outBadge.innerText = '⚠️';
-        outBadge.className = 'outcome-badge review';
-        outTitle.innerText = 'Case Escalated to EDD Review Queue';
-        outTitle.style.color = 'var(--amber-light)';
-        outSub.innerText = 'Risk threshold exceeded (>50). Requires Enhanced Due Diligence by Risk Team.';
-        outResult.innerText = 'ESCALATED (EDD QUEUE)';
-        outResult.style.color = 'var(--amber-light)';
+      AppState.calculatedScore = Math.min(riskScore, 100);
 
-        if (actionBtn) {
-          actionBtn.innerText = "Submit Case to EDD Queue";
-          actionBtn.className = "btn btn-warning"; // Amber / Warning styling
-        }
+      const badge = document.getElementById('outBadge');
+      const title = document.getElementById('outTitle');
+      const sub = document.getElementById('outSub');
+      const scoreEl = document.getElementById('outScore');
+      const bioEl = document.getElementById('outBio');
+      const acraEl = document.getElementById('outAcra');
+      const resultEl = document.getElementById('outResult');
+      const timeEl = document.getElementById('outTime');
+
+      scoreEl.innerText = `${AppState.calculatedScore} / 100 (${AppState.calculatedScore < 40 ? 'LOW RISK' : 'MEDIUM RISK'})`;
+      bioEl.innerText = `${AppState.biometricScore}% MATCH`;
+      acraEl.innerText = AppState.acraVerified ? 'VERIFIED MATCH' : 'UNVERIFIED';
+      timeEl.innerText = `${formatSGT()} (SGT)`;
+
+      if (AppState.calculatedScore < 50) {
+        badge.className = 'outcome-badge approved';
+        badge.innerText = '✓';
+        title.innerText = 'Straight-Through Processing (STP) Approved';
+        sub.innerText = 'Entity verified under low-risk parameters. Compliance requirements fulfilled for immediate account activation.';
+        resultEl.innerText = 'AUTOMATED COMPLIANCE CLEARANCE';
+        resultEl.style.color = 'var(--emerald-light)';
       } else {
-        // Approved Straight-Through Processing State
-        outBadge.innerText = '✓';
-        outBadge.className = 'outcome-badge approved';
-        outTitle.innerText = 'Corporate Onboarding Approved';
-        outTitle.style.color = 'var(--emerald-light)';
-        outSub.innerText = 'All regulatory compliance checks passed. Low risk classification achieved.';
-        outResult.innerText = 'APPROVED (STP)';
-        outResult.style.color = 'var(--emerald-light)';
+        badge.className = 'outcome-badge review';
+        badge.innerText = '⚠️';
+        title.innerText = 'Enhanced Due Diligence (EDD) Escalation';
+        sub.innerText = 'Elevated risk indicators identified. Entity referred to Senior Compliance Officer for manual evaluation.';
+        resultEl.innerText = 'EDD MANUAL REVIEW REQUIRED';
+        resultEl.style.color = 'var(--amber-light)';
+      }
+    }
 
-        if (actionBtn) {
-          actionBtn.innerText = "Proceed to Dashboard";
-          actionBtn.className = "btn btn-primary"; // Standard Blue/Green styling
+    function resetEngine() {
+      if (confirm('Are you sure you want to reset the engine and restart onboarding?')) {
+        clearEverything();
+      }
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Element References
+      const chatToggle = document.getElementById('chatToggle');
+      const chatWindow = document.getElementById('chatWindow');
+      const chatClose = document.getElementById('chatClose');
+      const chatMessages = document.getElementById('chatMessages');
+      const chatInput = document.getElementById('chatInput');
+      const sendMessageBtn = document.getElementById('sendMessage');
+
+      // Webhook Endpoint URL
+      const WEBHOOK_URL = 'https://n8ngc.codeblazar.org/webhook/chatbot';
+
+      // Toggle Chat Window Visibility
+      function toggleChat() {
+        chatWindow.classList.toggle('hidden');
+        if (!chatWindow.classList.contains('hidden')) {
+          chatInput.focus();
         }
       }
 
-      saveAllState();
+      chatToggle.addEventListener('click', toggleChat);
+      chatClose.addEventListener('click', toggleChat);
+
+      // Auto-scroll to the bottom of the chat container
+      function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Helper to create message UI elements
+      function appendMessage(sender, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+
+        const paragraph = document.createElement('p');
+        
+        if (sender === 'bot' && typeof marked !== 'undefined') {
+          // Render Markdown if 'marked' library is present
+          paragraph.innerHTML = marked.parse(text);
+        } else {
+          paragraph.textContent = text;
+        }
+
+        messageDiv.appendChild(paragraph);
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+        return messageDiv;
+      }
+
+      // Append Typing Indicator
+      function showTypingIndicator() {
+        const indicatorDiv = document.createElement('div');
+        indicatorDiv.classList.add('bot-message', 'typing-indicator');
+        indicatorDiv.id = 'typingIndicator';
+        indicatorDiv.innerHTML = '<p><em>Assistant is typing...</em></p>';
+        chatMessages.appendChild(indicatorDiv);
+        scrollToBottom();
+      }
+
+      // Remove Typing Indicator
+      function removeTypingIndicator() {
+        const indicatorDiv = document.getElementById('typingIndicator');
+        if (indicatorDiv) {
+          indicatorDiv.remove();
+        }
+      }
+
+      // Send Message Handler
+      async function handleSendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // 1. Display User Message
+        appendMessage('user', text);
+        chatInput.value = '';
+
+        // 2. Display Typing Indicator
+        showTypingIndicator();
+
+        try {
+          // 3. Execute Fetch Request to n8n Webhook
+          const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: text })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // 4. Extract Response Content
+          // Handled common keys returned by n8n (output, message, reply, text, response)
+          const botReply = data.output || data.message || data.reply || data.text || data.response || JSON.stringify(data);
+
+          // 5. Render Response
+          removeTypingIndicator();
+          appendMessage('bot', botReply);
+
+        } catch (error) {
+          console.error('Chatbot error:', error);
+          removeTypingIndicator();
+          appendMessage('bot', 'Sorry, I am having trouble connecting to the service right now. Please try again in a moment.');
+        }
+      }
+
+      // Event Listeners for Submitting
+      sendMessageBtn.addEventListener('click', handleSendMessage);
+
+      chatInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          handleSendMessage();
+        }
+      });
+    });
+
+    // Function to show realistic typing dots
+    function showTypingIndicator() {
+      const chatMessages = document.getElementById('chatMessages');
+      
+      // Remove any existing indicator first
+      removeTypingIndicator();
+
+      const indicator = document.createElement('div');
+      indicator.id = 'typingIndicator';
+      indicator.className = 'typing-bubble';
+      indicator.innerHTML = `
+        <span class="typing-label">RegFlow is typing</span>
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `;
+      
+      chatMessages.appendChild(indicator);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function handleFinalAction() {
-      if (AppState.calculatedScore > 50) {
-        showToast('Case successfully submitted to EDD Review Queue.');
-      } else {
-        showToast('Redirecting to Corporate Dashboard...');
+    // Function to remove typing dots
+    function removeTypingIndicator() {
+      const existing = document.getElementById('typingIndicator');
+      if (existing) {
+        existing.remove();
       }
+    }
+
+    // Function to stream response text char-by-char with natural cadence
+    function typeOutBotMessage(text, callback) {
+      removeTypingIndicator();
+
+      const chatMessages = document.getElementById('chatMessages');
+      const botMsg = document.createElement('div');
+      botMsg.className = 'bot-message typing-cursor';
+      chatMessages.appendChild(botMsg);
+
+      let index = 0;
+
+      function typeNextChar() {
+        if (index < text.length) {
+          botMsg.textContent += text.charAt(index);
+          index++;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+
+          // Add slight randomized delay to simulate human key strokes
+          let delay = Math.floor(Math.random() * 20) + 15;
+          
+          // Pause slightly longer on punctuation
+          const char = text.charAt(index - 1);
+          if (['.', ',', '!', '?', '\n'].includes(char)) {
+            delay += 120;
+          }
+
+          setTimeout(typeNextChar, delay);
+        } else {
+          // Typing finished: remove blinking cursor
+          botMsg.classList.remove('typing-cursor');
+          if (callback) callback();
+        }
+      }
+
+      typeNextChar();
     }
   </script>
 </body>

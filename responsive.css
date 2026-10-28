@@ -1,0 +1,62 @@
+/* Responsive-only enhancements. Desktop layout, colours, interactions and logic unchanged. */
+@media (max-width: 1024px) {
+  html { -webkit-text-size-adjust: 100%; }
+  body { max-width: 100%; }
+  body, main, section, article, .panel, .dash-panel, .table-card { min-width: 0; }
+  img, svg, video { max-width: 100%; }
+  input, select, textarea { max-width: 100%; min-width: 0; }
+  .dashboard-container, .main-container { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .dashboard-grid { grid-template-columns: minmax(0,1fr); }
+  .metrics-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .table-container { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .table-container table { min-width: 760px; }
+  .ubo-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .modal-wrapper { max-width: calc(100vw - 2rem); }
+  .modal-body { max-height: 75dvh; overflow-y: auto; }
+}
+@media (max-width: 768px) {
+  header { padding: 0.9rem 1rem; gap: 0.8rem; flex-wrap: wrap; }
+  .brand-container, .header-actions { min-width: 0; }
+  .brand-tag { max-width: 100%; }
+  .header-actions { flex-wrap: wrap; justify-content: flex-start; }
+  .dashboard-container, .main-container { margin-top: 1rem; margin-bottom: 1rem; padding-left: 1rem; padding-right: 1rem; gap: 1.1rem; }
+  .dashboard-title-bar, .table-toolbar { flex-wrap: wrap; gap: 0.8rem; }
+  .metrics-row, .metrics-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.75rem; }
+  .metric-card { min-width: 0; }
+  .details-grid, .info-grid { grid-template-columns: minmax(0,1fr); }
+  .form-grid { grid-template-columns: minmax(0,1fr); }
+  .app-layout { grid-template-columns: minmax(0,1fr); }
+  .sidebar { padding: 1rem; }
+  .workspace { min-width: 0; padding: 1rem; }
+  .workflow-list { display: flex; overflow-x: auto; gap: 0.6rem; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
+  .workflow-item { flex: 0 0 auto; }
+  .action-row { flex-wrap: wrap; gap: 0.65rem; }
+  .action-row .btn { max-width: 100%; }
+  .preview-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .options-grid { grid-template-columns: minmax(0,1fr); padding: 1rem; gap: 1rem; }
+  .role-tile { padding: 1.25rem; }
+  .portal-card { width: 100%; }
+  .modal-overlay { padding: 0.75rem; }
+  .modal-wrapper { width: 100%; max-width: 100%; max-height: 92dvh; overflow: hidden; }
+  .modal-body { max-height: calc(92dvh - 90px); overflow-y: auto; }
+  .filter-group { flex-wrap: wrap; }
+  .search-box { min-width: 0; max-width: 100%; }
+  .pagination-bar { flex-wrap: wrap; gap: 0.75rem; }
+  footer { max-width: 100%; text-align: center; }
+}
+@media (max-width: 480px) {
+  header { padding: 0.75rem; }
+  .brand-name { font-size: 1rem; }
+  .brand-tag { font-size: 0.65rem; }
+  .dashboard-container, .main-container { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .metrics-row, .metrics-grid { grid-template-columns: minmax(0,1fr); }
+  .dashboard-grid, .details-grid, .info-grid, .form-grid, .preview-grid { grid-template-columns: minmax(0,1fr); }
+  .workspace { padding: 0.75rem; }
+  .panel, .dash-panel, .table-card { max-width: 100%; }
+  .action-row > button, .action-row > .btn { flex: 1 1 auto; }
+  .portal-card .options-grid { padding: 0.75rem; }
+  .role-tile { padding: 1rem; }
+  .table-toolbar { padding: 0.8rem; }
+  .modal-header, .modal-body { padding-left: 0.85rem; padding-right: 0.85rem; }
+  .top-nav { gap: 0.75rem; flex-wrap: wrap; }
+}
